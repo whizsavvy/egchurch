@@ -19,7 +19,17 @@ def _get_run_color_hex(run: Run) -> str | None:
     rgb = run.font.color.rgb
     if rgb is None:
         return None
-    return rgb[:6] if isinstance(rgb, str) else f"{rgb:06X}"
+    if isinstance(rgb, str):
+        return rgb[:6]
+    # python-docx can return RGBColor object (has .r, .g, .b)
+    if hasattr(rgb, "r") and hasattr(rgb, "g") and hasattr(rgb, "b"):
+        return f"{int(rgb.r):02X}{int(rgb.g):02X}{int(rgb.b):02X}"
+    if isinstance(rgb, int):
+        return f"{rgb:06X}"
+    try:
+        return str(rgb)[:6]
+    except Exception:
+        return None
 
 
 def _normalize_color(r: int | None, g: int | None, b: int | None) -> str | None:
