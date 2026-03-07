@@ -1,0 +1,12 @@
+{
+  "version": 2,
+  "rewrites": [
+    { "source": "/", "destination": "/index.html" }
+  ],
+  "functions": {
+    "api/generate_pptx.py": {
+      "runtime": "python3.9",
+      "maxDuration": 60
+    }
+  }
+}

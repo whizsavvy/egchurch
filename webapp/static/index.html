@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>늘푸른교회 자막 만들기</title>
+  <style>
+    :root {
+      --bg: #1a1f2e;
+      --card: #252b3b;
+      --text: #e6edf3;
+      --muted: #8b949e;
+      --accent: #2ea043;
+      --accent-hover: #3fb950;
+      --red: #f85149;
+      --border: #30363d;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: "Pretendard", "Malgun Gothic", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 24px;
+      line-height: 1.5;
+    }
+    h1 { font-size: 1.5rem; margin-top: 0; color: var(--text); }
+    h2 { font-size: 1.1rem; color: var(--muted); margin-top: 24px; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    label { display: block; margin-bottom: 8px; color: var(--muted); font-size: 0.9rem; }
+    input[type="file"] { margin-bottom: 12px; }
+    button, .btn {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.95rem;
+    }
+    button:hover, .btn:hover { background: var(--accent-hover); }
+    textarea {
+      width: 100%;
+      min-height: 120px;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: #0d1117;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 14px;
+      resize: vertical;
+    }
+    textarea.code { min-height: 200px; font-family: "Consolas", "Monaco", monospace; font-size: 13px; }
+    .red { color: var(--red); }
+    .summary { white-space: pre-wrap; background: #0d1117; padding: 12px; border-radius: 8px; font-size: 0.9rem; max-height: 200px; overflow-y: auto; }
+    .step { margin-bottom: 28px; }
+    .step-num { display: inline-block; width: 26px; height: 26px; background: var(--accent); color: #fff; border-radius: 50%; text-align: center; line-height: 26px; font-size: 0.9rem; margin-right: 8px; font-weight: bold; }
+    a { color: var(--accent); }
+    .error { color: var(--red); margin-top: 8px; }
+    .hint { color: var(--muted); font-size: 0.85rem; margin-top: 4px; }
+  </style>
+</head>
+<body>
+  <h1>늘푸른교회 자막 만들기</h1>
+  <p class="muted">사람이 할 일: (1) 원고 첨부 → (2) 필요 시 찬송 변경 → (3) 필요 시 카드/이미지 페이지 추가 → (4) 파일 추출</p>
+
+  <!-- 1. 원고 DOCX 첨부 -->
+  <div class="step">
+    <h2><span class="step-num">1</span> 원고 DOCX 첨부</h2>
+    <div class="card">
+      <label>설교 원고 파일 (본문/인용 구절은 빨간색으로 표시)</label>
+      <input type="file" id="docxFile" accept=".docx" />
+      <button type="button" id="btnParse">파싱하기</button>
+      <div id="parseError" class="error"></div>
+      <div id="parseResult" style="margin-top: 12px; display: none;"></div>
+      <p class="hint">파싱 결과를 설교 자막 프롬프트와 함께 AI에 넣고, 생성된 코드는 4단계 입력창에 붙여넣으세요. <a href="/static/PROMPT_SERMON.md" target="_blank">프롬프트 보기</a></p>
+    </div>
+  </div>
+
+  <!-- 2. 필요 시 찬송 업데이트/변경 -->
+  <div class="step">
+    <h2><span class="step-num">2</span> 필요하면 찬송(hymn) 업데이트/변경</h2>
+    <div class="card">
+      <label>이번 주 찬송가 목록 (한 줄에 한 곡, hymn.txt에 있는 제목으로)</label>
+      <textarea id="hymnList" placeholder="임재&#10;좋으신 하나님&#10;내가 매일 기쁘게&#10;마음 속에 근심 있는 사람&#10;우리 주 하나님"></textarea>
+      <p class="hint">비우면 찬송 슬라이드를 넣지 않습니다. EvergreenSlideMaker/Hymn/hymn.txt 에 제목이 있어야 합니다.</p>
+    </div>
+  </div>
+
+  <!-- 3. 필요 시 이미지칸·카드 페이지 -->
+  <div class="step">
+    <h2><span class="step-num">3</span> 필요하면 다른 이미지칸·카드 페이지 추가</h2>
+    <div class="card">
+      <label>카드 슬라이드 텍스트 (한 줄에 하나, 예: 통성기도, 대표기도, 성가대 찬양, 광고, 축도)</label>
+      <textarea id="cardSlides" placeholder="성가대 찬양&#10;통성기도&#10;대표기도&#10;광고&#10;축도"></textarea>
+      <p class="hint">비우면 카드 슬라이드를 넣지 않습니다. 설교 구절 슬라이드 뒤에 이 순서로 추가됩니다.</p>
+    </div>
+  </div>
+
+  <!-- 4. 최종 파일 추출 -->
+  <div class="step">
+    <h2><span class="step-num">4</span> 최종 파일 추출</h2>
+    <div class="card">
+      <label>설교 자막 코드 (AI가 생성한 add_bible_slide / add_subtitle_slide 호출, 한 줄에 한 함수)</label>
+      <textarea id="codeInput" class="code" placeholder="add_bible_slide(prs, directory, &quot;로마서&quot;, &quot;8:11&quot;)&#10;add_subtitle_slide(prs, input_text=&quot;제목 (로마서 8:11)&quot;)&#10;add_bible_slide(prs, directory, &quot;마가복음&quot;, &quot;1:15&quot;)&#10;..."></textarea>
+      <button type="button" id="btnGenerate" style="margin-top: 12px;">PPTX 생성 후 다운로드</button>
+      <div id="genError" class="error"></div>
+      <p class="hint">위 2·3단계에서 넣은 찬송·카드가 설교 슬라이드 뒤에 붙어서 한 PPTX로 내려받아집니다.</p>
+    </div>
+  </div>
+
+  <script>
+    const docxFile = document.getElementById("docxFile");
+    const btnParse = document.getElementById("btnParse");
+    const parseError = document.getElementById("parseError");
+    const parseResult = document.getElementById("parseResult");
+    const hymnList = document.getElementById("hymnList");
+    const cardSlides = document.getElementById("cardSlides");
+    const codeInput = document.getElementById("codeInput");
+    const btnGenerate = document.getElementById("btnGenerate");
+    const genError = document.getElementById("genError");
+
+    btnParse.addEventListener("click", async () => {
+      parseError.textContent = "";
+      parseResult.style.display = "none";
+      const file = docxFile.files[0];
+      if (!file) {
+        parseError.textContent = "DOCX 파일을 선택해 주세요.";
+        return;
+      }
+      const form = new FormData();
+      form.append("file", file);
+      try {
+        const res = await fetch("/api/parse-docx", { method: "POST", body: form });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || data.message || "파싱 실패");
+        let html = "<p><strong>RED(#FF0000)로 추출된 텍스트 (순서대로):</strong></p>";
+        if (data.red_summary && data.red_summary.length) {
+          html += '<div class="summary">' + data.red_summary.map((t) => t || "(빈 줄)").join("\n") + "</div>";
+        } else {
+          html += '<div class="summary">(빨간색으로 표시된 런이 없습니다.)</div>';
+        }
+        html += "<p style='margin-top:12px;'><strong>전체 파싱 구조(JSON)를 AI 프롬프트에 넣을 때 사용:</strong></p>";
+        html += '<textarea readonly style="width:100%; height:120px; font-size:12px;">' + JSON.stringify(data.parsed, null, 2) + "</textarea>";
+        parseResult.innerHTML = html;
+        parseResult.style.display = "block";
+      } catch (e) {
+        parseError.textContent = e.message || "요청 실패";
+      }
+    });
+
+    btnGenerate.addEventListener("click", async () => {
+      genError.textContent = "";
+      const code = codeInput.value.trim();
+      const hymns = hymnList.value.trim().split("\n").map((s) => s.trim()).filter(Boolean);
+      const cards = cardSlides.value.trim().split("\n").map((s) => s.trim()).filter(Boolean);
+      if (!code) {
+        genError.textContent = "설교 자막 코드를 입력해 주세요.";
+        return;
+      }
+      try {
+        const res = await fetch("/api/generate-pptx", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ code, hymn_list: hymns, card_slides: cards }),
+        });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err.detail || err.message || res.statusText);
+        }
+        const blob = await res.blob();
+        const name = res.headers.get("content-disposition")?.match(/filename="?([^";]+)"?/)?.[1] || "sermon.pptx";
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = name;
+        a.click();
+        URL.revokeObjectURL(a.href);
+      } catch (e) {
+        genError.textContent = e.message || "생성 실패";
+      }
+    });
+  </script>
+</body>
+</html>
