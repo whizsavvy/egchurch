@@ -2,10 +2,5 @@
   "version": 2,
   "rewrites": [
     { "source": "/", "destination": "/index.html" }
-  ],
-  "functions": {
-    "api/generate_pptx.py": {
-      "maxDuration": 60
-    }
-  }
+  ]
 }
