@@ -1,9 +1,9 @@
 """
-교회 자막 웹앱 API: DOCX 파싱, 슬라이드 코드 실행, PPTX 다운로드.
+교회 자막 웹앱 API: DOCX 파싱, 설교 코드 생성, PPTX 다운로드.
 """
 from __future__ import annotations
 import os
-import tempfile
+import sys
 from pathlib import Path
 
 from fastapi import FastAPI, File, HTTPException, UploadFile
@@ -13,6 +13,17 @@ from pydantic import BaseModel
 
 from docx_parser import get_red_runs_summary, parse_docx
 from slide_runner import run_sermon_code
+
+# lib 경로 (설교 코드 생성·찬송 포맷용)
+_ROOT = Path(__file__).resolve().parent.parent
+if str(_ROOT) not in sys.path:
+    sys.path.insert(0, str(_ROOT))
+try:
+    from lib.hymn_format import user_to_hymn_txt
+    from lib.sermon_prompt import SERMON_CODE_SYSTEM
+except ImportError:
+    user_to_hymn_txt = None
+    SERMON_CODE_SYSTEM = ""
 
 app = FastAPI(title="늘푸른교회 자막 웹앱", version="1.0.0")
 
@@ -26,6 +37,11 @@ class GeneratePptxBody(BaseModel):
     code: str
     hymn_list: list[str] | None = None
     card_slides: list[str] | None = None
+    hymn_txt_content: str | None = None
+
+
+class GenerateSermonCodeBody(BaseModel):
+    parsed: list[dict]
 
 
 @app.get("/")
@@ -58,19 +74,62 @@ async def api_parse_docx(file: UploadFile = File(...)):
         raise HTTPException(422, f"DOCX 파싱 실패: {e}") from e
 
 
+@app.post("/api/generate_sermon_code")
+async def api_generate_sermon_code(body: GenerateSermonCodeBody):
+    """파싱된 DOCX로 설교 자막 코드를 AI가 생성합니다. OPENAI_API_KEY 필요."""
+    api_key = os.environ.get("OPENAI_API_KEY", "").strip()
+    if not api_key:
+        raise HTTPException(503, "OPENAI_API_KEY가 설정되지 않았습니다.")
+    if not (body.parsed or []):
+        raise HTTPException(400, "parsed (DOCX 파싱 결과)가 필요합니다.")
+    try:
+        import openai
+    except ImportError:
+        raise HTTPException(503, "openai 패키지가 설치되지 않았습니다.")
+    client = openai.OpenAI(api_key=api_key)
+    user_msg = (
+        "Below is the DOCX parsed structure. Generate ONLY the Python code lines "
+        "(add_bible_slide, add_subtitle_slide). Output nothing but the code, one per line.\n\n"
+        + __import__("json").dumps(body.parsed, ensure_ascii=False, indent=0)
+    )
+    resp = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[
+            {"role": "system", "content": SERMON_CODE_SYSTEM},
+            {"role": "user", "content": user_msg},
+        ],
+        temperature=0.2,
+    )
+    code = (resp.choices[0].message.content or "").strip()
+    if code.startswith("```"):
+        lines = code.split("\n")
+        if lines[0].startswith("```"):
+            lines = lines[1:]
+        if lines and lines[-1].strip() == "```":
+            lines = lines[:-1]
+        code = "\n".join(lines)
+    return {"code": code}
+
+
 @app.post("/api/generate-pptx")
 async def api_generate_pptx(body: GeneratePptxBody):
     """
-    설교 자막용 코드 + (선택) 찬송 목록 + (선택) 카드 슬라이드를 받아
-    PPTX를 생성하고 다운로드합니다.
+    설교 자막용 코드 + (선택) 찬송 목록/내용 + (선택) 카드 슬라이드를 받아 PPTX를 생성합니다.
     """
     code = (body.code or "").strip()
     if not code:
         raise HTTPException(400, "코드를 입력해 주세요.")
     hymn_list = body.hymn_list or []
     card_slides = body.card_slides or []
+    hymn_txt_raw = (body.hymn_txt_content or "").strip()
+    hymn_txt_content = user_to_hymn_txt(hymn_txt_raw) if hymn_txt_raw and user_to_hymn_txt else None
     try:
-        out_path = run_sermon_code(code, hymn_list=hymn_list, card_slides=card_slides)
+        out_path = run_sermon_code(
+            code,
+            hymn_list=hymn_list,
+            card_slides=card_slides,
+            hymn_txt_content=hymn_txt_content,
+        )
         return FileResponse(
             out_path,
             media_type="application/vnd.openxmlformats-officedocument.presentationml.presentation",

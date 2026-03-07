@@ -9,6 +9,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if ROOT not in sys.path:
     sys.path.insert(0, ROOT)
 
+from lib.hymn_format import user_to_hymn_txt
 from lib.slide_runner import run_sermon_code
 
 
@@ -30,7 +31,14 @@ class handler(BaseHTTPRequestHandler):
                 return
             hymn_list = data.get("hymn_list") or []
             card_slides = data.get("card_slides") or []
-            out_path = run_sermon_code(code, hymn_list=hymn_list, card_slides=card_slides)
+            hymn_txt_raw = (data.get("hymn_txt_content") or "").strip()
+            hymn_txt_content = user_to_hymn_txt(hymn_txt_raw) if hymn_txt_raw else None
+            out_path = run_sermon_code(
+                code,
+                hymn_list=hymn_list,
+                card_slides=card_slides,
+                hymn_txt_content=hymn_txt_content,
+            )
             with open(out_path, "rb") as f:
                 pptx_bytes = f.read()
             try:

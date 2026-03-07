@@ -45,6 +45,7 @@
       font-size: 0.95rem;
     }
     button:hover, .btn:hover { background: var(--accent-hover); }
+    button:disabled { opacity: 0.6; cursor: not-allowed; }
     textarea {
       width: 100%;
       min-height: 120px;
@@ -65,11 +66,13 @@
     a { color: var(--accent); }
     .error { color: var(--red); margin-top: 8px; }
     .hint { color: var(--muted); font-size: 0.85rem; margin-top: 4px; }
+    .btn-group { margin-top: 8px; }
+    .btn-group button { margin-right: 8px; }
   </style>
 </head>
 <body>
   <h1>늘푸른교회 자막 만들기</h1>
-  <p class="muted">사람이 할 일: (1) 원고 첨부 → (2) 필요 시 찬송 변경 → (3) 필요 시 카드/이미지 페이지 추가 → (4) 파일 추출</p>
+  <p class="muted">(1) 원고 첨부 → (2) 설교 코드 자동 생성 → (3) 찬송/카드 입력 → (4) 파일 추출</p>
 
   <div class="step">
     <h2><span class="step-num">1</span> 원고 DOCX 첨부</h2>
@@ -79,36 +82,42 @@
       <button type="button" id="btnParse">파싱하기</button>
       <div id="parseError" class="error"></div>
       <div id="parseResult" style="margin-top: 12px; display: none;"></div>
-      <p class="hint">파싱 결과를 설교 자막 프롬프트와 함께 AI에 넣고, 생성된 코드는 4단계 입력창에 붙여넣으세요. <a href="/PROMPT_SERMON.md" target="_blank">프롬프트 보기</a></p>
+      <div id="codeGenArea" style="margin-top: 12px; display: none;">
+        <button type="button" id="btnGenCode">설교 자막 코드 자동 생성</button>
+        <span id="codeGenError" class="error"></span>
+      </div>
     </div>
   </div>
 
   <div class="step">
-    <h2><span class="step-num">2</span> 필요하면 찬송(hymn) 업데이트/변경</h2>
+    <h2><span class="step-num">2</span> 찬송가(hymn) 추가</h2>
     <div class="card">
-      <label>이번 주 찬송가 목록 (한 줄에 한 곡, hymn.txt에 있는 제목으로)</label>
-      <textarea id="hymnList" placeholder="임재&#10;좋으신 하나님&#10;내가 매일 기쁘게&#10;마음 속에 근심 있는 사람&#10;우리 주 하나님"></textarea>
-      <p class="hint">비우면 찬송 슬라이드를 넣지 않습니다. EvergreenSlideMaker/Hymn/hymn.txt 에 제목이 있어야 합니다.</p>
+      <label>찬송가 내용 (한 곡당 아래 형식으로, 곡 사이는 빈 줄로 구분)</label>
+      <textarea id="hymnTxtContent" placeholder="제목&#10;------&#10;1절 가사...&#10;2절 가사...&#10;&#10;다음 곡 제목&#10;------&#10;가사..."></textarea>
+      <p class="hint">형식: 첫 줄에 제목, 다음 줄에 ------ , 그 다음 줄부터 가사. 여러 곡은 빈 줄로 구분.</p>
+      <label style="margin-top:12px;">이번 주 찬송 순서 (한 줄에 한 곡 제목, 위에서 넣은 제목과 같게)</label>
+      <textarea id="hymnList" style="min-height:60px" placeholder="임재&#10;좋으신 하나님&#10;내가 매일 기쁘게"></textarea>
+      <p class="hint">PPT에 넣을 찬송가 제목을 순서대로 적으세요. 비우면 찬송 슬라이드를 넣지 않습니다.</p>
     </div>
   </div>
 
   <div class="step">
-    <h2><span class="step-num">3</span> 필요하면 다른 이미지칸·카드 페이지 추가</h2>
+    <h2><span class="step-num">3</span> 카드 슬라이드 (선택)</h2>
     <div class="card">
-      <label>카드 슬라이드 텍스트 (한 줄에 하나, 예: 통성기도, 대표기도, 성가대 찬양, 광고, 축도)</label>
-      <textarea id="cardSlides" placeholder="성가대 찬양&#10;통성기도&#10;대표기도&#10;광고&#10;축도"></textarea>
-      <p class="hint">비우면 카드 슬라이드를 넣지 않습니다. 설교 구절 슬라이드 뒤에 이 순서로 추가됩니다.</p>
+      <label>카드 슬라이드 텍스트 (한 줄에 하나, 예: 통성기도, 대표기도, 광고, 축도)</label>
+      <textarea id="cardSlides" style="min-height:80px" placeholder="통성기도&#10;대표기도&#10;광고&#10;축도"></textarea>
     </div>
   </div>
 
   <div class="step">
-    <h2><span class="step-num">4</span> 최종 파일 추출</h2>
+    <h2><span class="step-num">4</span> 설교 자막 코드 &amp; 파일 추출</h2>
     <div class="card">
-      <label>설교 자막 코드 (AI가 생성한 add_bible_slide / add_subtitle_slide 호출, 한 줄에 한 함수)</label>
-      <textarea id="codeInput" class="code" placeholder="add_bible_slide(prs, directory, &quot;로마서&quot;, &quot;8:11&quot;)&#10;add_subtitle_slide(prs, input_text=&quot;제목 (로마서 8:11)&quot;)&#10;add_bible_slide(prs, directory, &quot;마가복음&quot;, &quot;1:15&quot;)&#10;..."></textarea>
-      <button type="button" id="btnGenerate" style="margin-top: 12px;">PPTX 생성 후 다운로드</button>
+      <label>설교 자막 코드 (1단계에서 자동 생성 후 필요하면 수정)</label>
+      <textarea id="codeInput" class="code" placeholder="add_bible_slide(prs, directory, &quot;로마서&quot;, &quot;8:11&quot;)&#10;add_subtitle_slide(prs, input_text=&quot;제목 (로마서 8:11)&quot;)&#10;..."></textarea>
+      <div class="btn-group">
+        <button type="button" id="btnGenerate">PPTX 생성 후 다운로드</button>
+      </div>
       <div id="genError" class="error"></div>
-      <p class="hint">위 2·3단계에서 넣은 찬송·카드가 설교 슬라이드 뒤에 붙어서 한 PPTX로 내려받아집니다.</p>
     </div>
   </div>
 
@@ -117,15 +126,23 @@
     const btnParse = document.getElementById("btnParse");
     const parseError = document.getElementById("parseError");
     const parseResult = document.getElementById("parseResult");
+    const codeGenArea = document.getElementById("codeGenArea");
+    const btnGenCode = document.getElementById("btnGenCode");
+    const codeGenError = document.getElementById("codeGenError");
+    const hymnTxtContent = document.getElementById("hymnTxtContent");
     const hymnList = document.getElementById("hymnList");
     const cardSlides = document.getElementById("cardSlides");
     const codeInput = document.getElementById("codeInput");
     const btnGenerate = document.getElementById("btnGenerate");
     const genError = document.getElementById("genError");
 
+    let lastParsed = null;
+
     btnParse.addEventListener("click", async () => {
       parseError.textContent = "";
       parseResult.style.display = "none";
+      codeGenArea.style.display = "none";
+      codeGenError.textContent = "";
       const file = docxFile.files[0];
       if (!file) {
         parseError.textContent = "DOCX 파일을 선택해 주세요.";
@@ -137,18 +154,43 @@
         const res = await fetch("/api/parse_docx", { method: "POST", body: form });
         const data = await res.json();
         if (!res.ok) throw new Error(data.detail || data.message || "파싱 실패");
+        lastParsed = data.parsed;
         let html = "<p><strong>RED(#FF0000)로 추출된 텍스트 (순서대로):</strong></p>";
         if (data.red_summary && data.red_summary.length) {
           html += '<div class="summary">' + data.red_summary.map((t) => t || "(빈 줄)").join("\n") + "</div>";
         } else {
           html += '<div class="summary">(빨간색으로 표시된 런이 없습니다.)</div>';
         }
-        html += "<p style='margin-top:12px;'><strong>전체 파싱 구조(JSON)를 AI 프롬프트에 넣을 때 사용:</strong></p>";
-        html += '<textarea readonly style="width:100%; height:120px; font-size:12px;">' + JSON.stringify(data.parsed, null, 2) + "</textarea>";
         parseResult.innerHTML = html;
         parseResult.style.display = "block";
+        codeGenArea.style.display = "block";
       } catch (e) {
         parseError.textContent = e.message || "요청 실패";
+      }
+    });
+
+    btnGenCode.addEventListener("click", async () => {
+      if (!lastParsed) {
+        codeGenError.textContent = "먼저 DOCX를 업로드하고 파싱하세요.";
+        return;
+      }
+      codeGenError.textContent = "";
+      btnGenCode.disabled = true;
+      btnGenCode.textContent = "생성 중...";
+      try {
+        const res = await fetch("/api/generate_sermon_code", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ parsed: lastParsed }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || data.message || "코드 생성 실패");
+        if (data.code) codeInput.value = data.code;
+      } catch (e) {
+        codeGenError.textContent = e.message || "요청 실패";
+      } finally {
+        btnGenCode.disabled = false;
+        btnGenCode.textContent = "설교 자막 코드 자동 생성";
       }
     });
 
@@ -157,15 +199,21 @@
       const code = codeInput.value.trim();
       const hymns = hymnList.value.trim().split("\n").map((s) => s.trim()).filter(Boolean);
       const cards = cardSlides.value.trim().split("\n").map((s) => s.trim()).filter(Boolean);
+      const hymnTxt = hymnTxtContent.value.trim();
       if (!code) {
-        genError.textContent = "설교 자막 코드를 입력해 주세요.";
+        genError.textContent = "설교 자막 코드가 비어 있습니다. 1단계에서 '설교 자막 코드 자동 생성'을 누르거나 직접 입력하세요.";
         return;
       }
       try {
         const res = await fetch("/api/generate_pptx", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ code, hymn_list: hymns, card_slides: cards }),
+          body: JSON.stringify({
+            code,
+            hymn_list: hymns,
+            card_slides: cards,
+            hymn_txt_content: hymnTxt || undefined,
+          }),
         });
         if (!res.ok) {
           const err = await res.json().catch(() => ({}));

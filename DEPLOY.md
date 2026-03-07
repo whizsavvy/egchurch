@@ -17,12 +17,18 @@
 3. **Root Directory**는 비워 두고(프로젝트 루트 그대로), **Framework Preset**은 "Other"로 두고 배포.
 4. 배포가 끝나면 `https://프로젝트명.vercel.app` 형태의 URL로 앱에 접속할 수 있습니다.
 
+### 환경 변수 (필수)
+
+- **OPENAI_API_KEY** — 설교 자막 코드 자동 생성에 사용합니다.  
+  Vercel 대시보드 → 프로젝트 → Settings → Environment Variables 에서 추가하세요.  
+  없으면 "설교 자막 코드 자동 생성" 버튼이 동작하지 않습니다 (코드는 직접 입력해야 함).
+
 ### 프로젝트 구조 (Vercel 기준)
 
-- `public/` — 정적 파일 (index.html, PROMPT_SERMON.md) → 루트 경로에서 제공
-- `api/` — 서버리스 함수 (parse_docx.py, generate_pptx.py) → `/api/parse_docx`, `/api/generate_pptx`
-- `lib/` — 공통 코드 (docx_parser, slide_runner)
-- `EvergreenSlideMaker/` — 기존 슬라이드 제작용 리소스 (성경, 찬송, 이미지 등)
+- `public/` — 정적 파일 (index.html 등) → 루트 경로에서 제공
+- `api/` — 서버리스 함수: `parse_docx`, `generate_sermon_code`, `generate_pptx`
+- `lib/` — 공통 코드 (docx_parser, slide_runner, hymn_format, sermon_prompt)
+- `EvergreenSlideMaker/` — 슬라이드 제작용 리소스 (성경, 찬송, 이미지 등)
 
 ---
 

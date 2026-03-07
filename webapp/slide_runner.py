@@ -1,16 +1,15 @@
 """
-설교 자막용 생성 코드( add_bible_slide / add_subtitle_slide 호출)를 실행하여
-PPTX 파일을 만들고 저장 경로를 반환합니다.
+설교 자막용 생성 코드를 실행해 PPTX를 생성합니다.
 EvergreenSlideMaker 폴더가 프로젝트 루트에 있어야 합니다.
 """
 from __future__ import annotations
 import datetime
 import os
+import shutil
 import sys
 import tempfile
 from pathlib import Path
 
-# 프로젝트 루트 = webapp의 상위
 ROOT = Path(__file__).resolve().parent.parent
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
@@ -19,7 +18,6 @@ os.chdir(ROOT)
 from pptx import Presentation
 from pptx.util import Cm
 
-# EvergreenSlideMaker.setting에서 함수만 가져오기 (folder_path 등 설정 유지)
 import importlib.util
 _setting_path = ROOT / "EvergreenSlideMaker" / "setting.py"
 if not _setting_path.exists():
@@ -31,7 +29,6 @@ _setting = importlib.util.module_from_spec(_spec)
 import datetime as _dt
 _setting.datetime = _dt
 _spec.loader.exec_module(_setting)
-# setting은 folder_path='EvergreenSlideMaker'로 되어 있으므로 절대경로로 덮어씀
 _setting.folder_path = str(ROOT / "EvergreenSlideMaker")
 folder_path = _setting.folder_path
 add_bible_slide = _setting.add_bible_slide
@@ -46,37 +43,54 @@ def run_sermon_code(
     output_filename: str | None = None,
     hymn_list: list[str] | None = None,
     card_slides: list[str] | None = None,
+    hymn_txt_content: str | None = None,
 ) -> str:
-    """
-    설교 자막용 코드를 실행한 뒤, 필요 시 찬송 슬라이드·카드 슬라이드를 추가해 PPTX를 저장합니다.
-    """
-    prs = Presentation()
-    prs.slide_width = Cm(33.867)
-    prs.slide_height = Cm(19.05)
-    today = datetime.datetime.now().strftime("%Y-%m-%d")
-    out_name = output_filename or f"{today}_늘푸른교회_.pptx"
-    out_path = os.path.join(tempfile.gettempdir(), out_name)
+    temp_evergreen = None
+    if hymn_txt_content and hymn_txt_content.strip():
+        temp_evergreen = Path(tempfile.mkdtemp())
+        try:
+            shutil.copytree(ROOT / "EvergreenSlideMaker", temp_evergreen / "EvergreenSlideMaker")
+            hymn_file = temp_evergreen / "EvergreenSlideMaker" / "Hymn" / "hymn.txt"
+            hymn_file.parent.mkdir(parents=True, exist_ok=True)
+            hymn_file.write_text(hymn_txt_content.strip(), encoding="utf-8")
+            _setting.folder_path = str(temp_evergreen / "EvergreenSlideMaker")
+        except Exception:
+            if temp_evergreen and temp_evergreen.exists():
+                shutil.rmtree(temp_evergreen, ignore_errors=True)
+            raise
 
-    local_globals = {
-        "prs": prs,
-        "directory": directory,
-        "add_bible_slide": add_bible_slide,
-        "add_subtitle_slide": add_subtitle_slide,
-    }
     try:
-        exec(code, local_globals)
-    except Exception as e:
-        raise RuntimeError(f"슬라이드 코드 실행 중 오류: {e}") from e
+        prs = Presentation()
+        prs.slide_width = Cm(33.867)
+        prs.slide_height = Cm(19.05)
+        today = datetime.datetime.now().strftime("%Y-%m-%d")
+        out_name = output_filename or f"{today}_늘푸른교회_.pptx"
+        out_path = os.path.join(tempfile.gettempdir(), out_name)
+        run_directory = os.path.join(_setting.folder_path, "bible")
 
-    # 설교 슬라이드 뒤에 찬송·카드 슬라이드 추가
-    if hymn_list and add_hymn_slide:
-        for title in hymn_list:
-            if title.strip():
-                add_hymn_slide(prs, title.strip())
-    if card_slides and add_card_slide:
-        for text in card_slides:
-            if text.strip():
-                add_card_slide(prs, input_text=text.strip())
+        local_globals = {
+            "prs": prs,
+            "directory": run_directory,
+            "add_bible_slide": add_bible_slide,
+            "add_subtitle_slide": add_subtitle_slide,
+        }
+        try:
+            exec(code, local_globals)
+        except Exception as e:
+            raise RuntimeError(f"슬라이드 코드 실행 중 오류: {e}") from e
 
-    prs.save(out_path)
-    return out_path
+        if hymn_list and add_hymn_slide:
+            for title in hymn_list:
+                if title.strip():
+                    add_hymn_slide(prs, title.strip())
+        if card_slides and add_card_slide:
+            for text in card_slides:
+                if text.strip():
+                    add_card_slide(prs, input_text=text.strip())
+
+        prs.save(out_path)
+        return out_path
+    finally:
+        if temp_evergreen and temp_evergreen.exists():
+            shutil.rmtree(temp_evergreen, ignore_errors=True)
+        _setting.folder_path = str(ROOT / "EvergreenSlideMaker")
