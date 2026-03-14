@@ -11,7 +11,10 @@
 | **OPENAI_API_KEY** | 권장 | 말씀 세팅의 "AI 도움받기"에 필요. 없으면 AI 생성 불가. |
 | **GITHUB_TOKEN** | 찬송 저장 시 필수 | 찬송 세팅에서 "GitHub에 저장" 시 사용. repo 권한 Personal Access Token. 없으면 저장 불가(불러오기는 가능). |
 
-- **GITHUB_TOKEN** 발급: GitHub → Settings → Developer settings → Personal access tokens → Generate new token → `repo` 체크.
+- **GITHUB_TOKEN** 발급: GitHub → Settings → Developer settings → Personal access tokens
+  - **Classic 토큰**: Generate new token (classic) → **`repo`** 체크 (또는 최소 `public_repo` if 공개 저장소).
+  - **Fine-grained 토큰**: Repository access에서 해당 저장소 선택 → Permissions에서 **Contents: Read and write** 부여.
+- "Resource not accessible by personal access token" 오류가 나면: 토큰 권한(scope) 부족이거나, 토큰 소유 계정이 해당 저장소(owner/repo)에 **쓰기 권한**이 없는 경우입니다. Classic이면 `repo` 체크, Fine-grained면 Contents 읽기/쓰기와 저장소 지정을 확인하세요.
 - 두 변수 모두 **Production**, **Preview**, **Development**에 적용해 두면 됩니다.
 
 ### 2. (선택) 다른 저장소를 쓸 때

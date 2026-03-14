@@ -70,6 +70,11 @@ class handler(BaseHTTPRequestHandler):
                 err_body = e.read().decode()
                 err_data = json.loads(err_body) if err_body else {}
                 msg = err_data.get("message", err_body)
+                if e.code == 403 or "resource not accessible" in (msg or "").lower():
+                    msg = (
+                        "GitHub 토큰 권한 부족입니다. 토큰에 repo 권한(또는 Fine-grained면 Contents 읽기/쓰기)이 있는지, "
+                        "해당 저장소에 쓰기 권한이 있는지 확인하세요. 자세한 내용은 DEPLOY.md를 참고하세요."
+                    )
             except Exception:
                 msg = str(e)
             self._send(e.code, {"detail": msg})
