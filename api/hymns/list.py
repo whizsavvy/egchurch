@@ -30,10 +30,10 @@ class handler(BaseHTTPRequestHandler):
                     items = json.loads(r.read().decode("utf-8"))
                 if isinstance(items, list):
                     titles = [filename_to_title(f.get("name", "")) for f in items if f.get("name", "").endswith(".txt")]
-            except urllib.error.HTTPError as e:
-                if e.code != 404:
-                    self._send(500, {"detail": "목록 조회 실패"})
-                    return
+            except urllib.error.HTTPError:
+                pass  # 403, 404 등이면 legacy 사용
+            except Exception:
+                pass
             if not titles:
                 titles = legacy_titles()
             titles.sort(key=lambda x: x)

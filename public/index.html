@@ -742,7 +742,7 @@
     async function loadHymnList() {
       try {
         const res = await fetch("/api/hymns/list");
-        const data = await res.json();
+        const data = await res.json().catch(() => ({}));
         hymnTitles = Array.isArray(data.items) ? data.items : [];
       } catch (_) {
         hymnTitles = [];
@@ -752,10 +752,11 @@
     }
     function renderHymnDropdown() {
       const listEl = document.getElementById("hymnDropdownList");
-      const q = (document.getElementById("hymnSearchInput").value || "").trim().toLowerCase();
+      const inputEl = document.getElementById("hymnSearchInput");
+      const q = (inputEl.value || "").trim().toLowerCase();
       const filtered = q ? hymnTitles.filter(t => t.toLowerCase().includes(q)) : hymnTitles;
       listEl.innerHTML = filtered.length ? filtered.map(t => `<div class="item" data-title="${t.replace(/"/g, "&quot;")}">${t}</div>`).join("") : "<div class='item' style='color:var(--muted);cursor:default'>" + (hymnTitles.length ? "검색 결과 없음" : "목록 새로고침을 눌러 주세요.") + "</div>";
-      listEl.classList.toggle("open", filtered.length > 0 && document.getElementById("hymnSearchInput") === document.activeElement);
+      listEl.classList.toggle("open", filtered.length > 0);
       listEl.querySelectorAll(".item[data-title]").forEach(el => {
         el.addEventListener("click", () => {
           const title = el.dataset.title;
