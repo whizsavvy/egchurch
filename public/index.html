@@ -3,78 +3,80 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>늘푸른교회 예배 자막</title>
+  <title>예배 자막 스튜디오 · 늘푸른교회</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --bg: #f8faf8;
+      --bg: #f5f7f5;
       --card: #fff;
-      --text: #1a2e1a;
-      --muted: #5c6b5c;
-      --accent: #2d6a2d;
-      --accent-light: #e8f0e8;
-      --red: #c44;
-      --border: #e0e8e0;
-      --shadow: 0 2px 12px rgba(0,0,0,0.06);
+      --text: #1c2a1c;
+      --muted: #5a6b5a;
+      --accent: #256f37;
+      --accent-hover: #1d5a2c;
+      --accent-light: #e6f0e8;
+      --red: #b53c3c;
+      --border: #d8e2d8;
+      --shadow: 0 1px 3px rgba(0,0,0,0.06);
+      --shadow-md: 0 4px 20px rgba(0,0,0,0.08);
+      --radius: 10px;
+      --radius-sm: 8px;
     }
     * { box-sizing: border-box; }
-    body {
-      font-family: "Noto Sans KR", "Malgun Gothic", sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      margin: 0;
-      padding: 0;
-      line-height: 1.6;
-    }
-    .app { max-width: 900px; margin: 0 auto; padding: 24px 20px 48px; }
-    h1 { font-size: 1.5rem; font-weight: 700; margin: 0 0 8px; color: var(--text); }
-    .subtitle { color: var(--muted); font-size: 0.9rem; margin-bottom: 24px; }
-    .tabs {
-      display: flex; gap: 4px; margin-bottom: 24px;
-      background: var(--card); padding: 6px; border-radius: 12px; box-shadow: var(--shadow);
-    }
-    .tabs button {
-      flex: 1; padding: 12px 16px; border: none; border-radius: 8px;
-      background: transparent; color: var(--muted); font-size: 0.9rem; font-weight: 500;
-      cursor: pointer; transition: all 0.2s;
-    }
+    body { font-family: "Noto Sans KR", -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 0 0 88px; line-height: 1.55; -webkit-font-smoothing: antialiased; }
+    .app { max-width: 720px; margin: 0 auto; padding: 24px 20px; }
+    .header { margin-bottom: 28px; text-align: center; }
+    .header .logo { font-size: 1.5rem; font-weight: 700; margin: 0 0 6px; letter-spacing: -0.02em; color: var(--text); }
+    .header .tagline { margin: 0; font-size: 0.9rem; color: var(--muted); font-weight: 400; }
+
+    .tabs { display: flex; gap: 4px; margin-bottom: 24px; background: var(--card); padding: 6px; border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid var(--border); }
+    .tabs button { flex: 1; padding: 12px 16px; border: none; border-radius: var(--radius-sm); background: transparent; color: var(--muted); font-size: 0.95rem; font-weight: 500; cursor: pointer; transition: color 0.2s, background 0.2s; }
     .tabs button:hover { color: var(--accent); background: var(--accent-light); }
     .tabs button.active { background: var(--accent); color: #fff; }
+    .tabs button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
     .panel { display: none; }
-    .panel.active { display: block; }
-    .card {
-      background: var(--card); border-radius: 12px; padding: 20px; margin-bottom: 20px;
-      box-shadow: var(--shadow); border: 1px solid var(--border);
-    }
-    .card h2 { font-size: 1.05rem; margin: 0 0 16px; color: var(--text); font-weight: 600; }
-    .btn {
-      display: inline-flex; align-items: center; gap: 6px;
-      padding: 10px 16px; border: none; border-radius: 8px;
-      background: var(--accent); color: #fff; font-size: 0.9rem; font-weight: 500;
-      cursor: pointer; transition: background 0.2s;
-    }
-    .btn:hover { background: #234a23; }
+    .panel.active { display: block; animation: fadeIn 0.25s ease; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    .section { background: var(--card); border-radius: var(--radius); padding: 22px; margin-bottom: 18px; box-shadow: var(--shadow); border: 1px solid var(--border); }
+    .section-title { font-size: 1.05rem; font-weight: 600; margin: 0 0 6px; color: var(--text); }
+    .section-desc { font-size: 0.875rem; color: var(--muted); margin-bottom: 16px; line-height: 1.5; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 10px 18px; border: none; border-radius: var(--radius-sm); background: var(--accent); color: #fff; font-size: 0.9rem; font-weight: 500; cursor: pointer; transition: background 0.2s, transform 0.05s; }
+    .btn:hover:not(:disabled) { background: var(--accent-hover); }
+    .btn:active:not(:disabled) { transform: scale(0.98); }
+    .btn:disabled { opacity: 0.7; cursor: not-allowed; }
+    .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
     .btn.outline { background: transparent; color: var(--accent); border: 1px solid var(--accent); }
-    .btn.outline:hover { background: var(--accent-light); }
+    .btn.outline:hover:not(:disabled) { background: var(--accent-light); }
     .btn.danger { background: var(--red); }
-    .btn.sm { padding: 6px 12px; font-size: 0.85rem; }
-    .btn-group { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
-    input[type="text"], input[type="file"], textarea {
-      width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px;
-      font-size: 0.95rem; font-family: inherit; background: var(--card);
+    .btn.danger:hover:not(:disabled) { background: #9a3232; }
+    .btn.sm { padding: 8px 14px; font-size: 0.875rem; }
+    .btn-group { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
+    input[type="text"], input[type="file"], textarea, select {
+      width: 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 0.95rem; font-family: inherit; background: var(--card); transition: border-color 0.2s;
     }
+    input:focus, textarea:focus, select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light); }
     textarea { min-height: 100px; resize: vertical; }
     label { display: block; margin-bottom: 6px; font-size: 0.85rem; color: var(--muted); font-weight: 500; }
+
+    .add-type-row { display: flex; align-items: flex-end; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+    .add-type-row .type-select { min-width: 140px; }
+    .add-type-row .form-inline { display: flex; gap: 8px; flex-wrap: wrap; align-items: flex-end; flex: 1; }
+    .add-type-row .form-inline input, .add-type-row .form-inline select { margin: 0; }
+    .add-type-row .form-inline label { margin-bottom: 4px; }
+    .add-type-form { padding: 14px; background: var(--accent-light); border-radius: 8px; margin-top: 10px; display: none; }
+    .add-type-form.visible { display: block; }
+    .add-type-form label { margin-top: 10px; }
+    .add-type-form label:first-child { margin-top: 0; }
+
     .order-list { list-style: none; padding: 0; margin: 0; }
     .order-list li {
-      display: flex; align-items: center; gap: 12px; padding: 12px 14px;
-      background: var(--bg); border-radius: 8px; margin-bottom: 8px; border: 1px solid var(--border);
+      display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: var(--bg); border-radius: 8px; margin-bottom: 6px; border: 1px solid var(--border);
+      cursor: pointer; transition: background 0.15s;
     }
-    .order-list li .badge {
-      flex-shrink: 0; padding: 4px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: 500;
-    }
+    .order-list li:hover { background: var(--accent-light); }
+    .order-list li .badge { flex-shrink: 0; padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 500; }
     .order-list li .badge.image { background: #e3f2fd; color: #1565c0; }
     .order-list li .badge.blank { background: #f5f5f5; color: #616161; }
     .order-list li .badge.hymn { background: #e8f5e9; color: #2e7d32; }
@@ -82,146 +84,254 @@
     .order-list li .badge.bible { background: #fce4ec; color: #c2185b; }
     .order-list li .badge.subtitle { background: #f3e5f5; color: #7b1fa2; }
     .order-list li .badge.sermon_block { background: #e0f2f1; color: #00695c; }
-    .order-list li .text { flex: 1; font-size: 0.9rem; color: var(--text); }
-    .order-list li .order-actions { flex-shrink: 0; display: flex; align-items: center; gap: 4px; }
-    .order-list li .order-actions .btn { padding: 4px 8px; min-width: auto; }
-    .order-list li .remove { padding: 4px; color: var(--muted); cursor: pointer; border: none; background: none; font-size: 1.1rem; line-height: 1; }
-    .order-list li .remove:hover { color: var(--red); }
-    .search-box { margin-bottom: 12px; }
-    .search-box input { max-width: 320px; }
-    .hymn-results { max-height: 200px; overflow-y: auto; }
-    .hymn-results .item {
-      padding: 10px 12px; border-radius: 8px; margin-bottom: 4px;
-      background: var(--bg); cursor: pointer; font-size: 0.9rem;
-      border: 1px solid transparent;
+    .order-list li .text { flex: 1; font-size: 0.9rem; min-width: 0; }
+    .order-list li .row-actions { flex-shrink: 0; display: flex; align-items: center; gap: 2px; }
+    .order-list li .row-actions .btn { padding: 4px 8px; min-width: auto; }
+    .order-list li .row-actions .remove { padding: 4px 8px; color: var(--muted); cursor: pointer; border: none; background: none; font-size: 1rem; border-radius: 4px; }
+    .order-list li .row-actions .remove:hover { color: var(--red); background: #fef2f2; }
+    .order-list.empty + .order-empty { display: block; }
+    .order-empty { display: none; padding: 32px 24px; text-align: center; background: var(--bg); border: 1px dashed var(--border); border-radius: var(--radius-sm); margin-top: 12px; color: var(--muted); font-size: 0.9rem; }
+    .order-empty strong { display: block; color: var(--text); font-weight: 600; margin-bottom: 6px; }
+
+    .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 100; display: none; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(4px); }
+    .overlay.open { display: flex; animation: fadeIn 0.2s ease; }
+    .modal {
+      background: var(--card); border-radius: var(--radius); padding: 24px; width: 100%; max-width: 440px; max-height: 85vh; overflow: hidden; display: flex; flex-direction: column; box-shadow: var(--shadow-md);
     }
-    .hymn-results .item:hover { border-color: var(--accent); background: var(--accent-light); }
-    .sermon-items .item {
-      display: flex; align-items: center; gap: 10px; padding: 10px 12px;
-      background: var(--bg); border-radius: 8px; margin-bottom: 8px; border: 1px solid var(--border);
-    }
-    .sermon-items .item .detail { flex: 1; font-size: 0.85rem; color: var(--muted); }
-    .msg { font-size: 0.85rem; margin-top: 8px; }
-    .msg.err { color: var(--red); }
-    .msg.ok { color: var(--accent); }
-    .flex { display: flex; gap: 12px; align-items: flex-start; flex-wrap: wrap; }
-    .flex .grow { flex: 1; min-width: 200px; }
-    #panelExport { padding-top: 8px; }
-    #btnExport { padding: 14px 24px; font-size: 1rem; }
+    .modal h3 { margin: 0 0 12px; font-size: 1rem; }
+    .modal .modal-body { overflow-y: auto; flex: 1; white-space: pre-wrap; font-size: 0.9rem; line-height: 1.6; padding: 12px 0; }
+    .modal .modal-body.loading { color: var(--muted); }
+    .modal-actions { margin-top: 14px; display: flex; justify-content: flex-end; }
+    .modal-list { max-height: 300px; overflow-y: auto; }
+    .modal-list .item { padding: 10px 12px; border-radius: 8px; margin-bottom: 4px; background: var(--bg); cursor: pointer; font-size: 0.9rem; border: 1px solid transparent; }
+    .modal-list .item:hover { border-color: var(--accent); background: var(--accent-light); }
+    .modal-search { margin-bottom: 10px; }
+
+    .cta-bar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card); border-top: 1px solid var(--border); padding: 16px 24px; box-shadow: 0 -4px 24px rgba(0,0,0,0.06); z-index: 50; display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+    .cta-bar .summary { font-size: 0.875rem; color: var(--muted); }
+    .cta-bar .btn { padding: 14px 28px; font-size: 1rem; font-weight: 600; }
+
+    .toast { position: fixed; bottom: 96px; left: 50%; transform: translateX(-50%) translateY(12px); padding: 14px 22px; border-radius: var(--radius-sm); font-size: 0.9rem; font-weight: 500; z-index: 200; background: var(--text); color: #fff; box-shadow: var(--shadow-md); opacity: 0; visibility: hidden; transition: opacity 0.25s, transform 0.25s ease; }
+    .toast.show { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
+    .toast.err { background: var(--red); }
+    .toast.ok { background: var(--accent); }
+
+    .btn.loading { pointer-events: none; }
+    .btn.loading::after { content: ""; width: 14px; height: 14px; margin-left: 8px; border: 2px solid rgba(255,255,255,0.4); border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite; }
+    .btn.outline.loading::after { border-color: rgba(37,111,55,0.3); border-top-color: var(--accent); }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* 찬송가 관리 */
+    .hymn-select-row { display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; margin-bottom: 14px; }
+    .hymn-select-row .search-wrap { flex: 1; min-width: 200px; }
+    .hymn-select-row .search-wrap input { margin: 0; }
+    .hymn-line-hint { font-size: 0.8rem; color: var(--muted); margin-top: 4px; }
+    .hymn-add-new { padding: 14px; background: var(--accent-light); border-radius: 8px; margin-top: 16px; }
+    .hymn-add-new label { margin-top: 10px; }
+    .hymn-add-new label:first-child { margin-top: 0; }
   </style>
 </head>
 <body>
   <div class="app">
-    <h1>늘푸른교회 예배 자막</h1>
-    <p class="subtitle">예배 순서를 세팅하고, 찬송과 말씀을 채운 뒤 PPT를 만드세요.</p>
-
-    <nav class="tabs" role="tablist">
-      <button type="button" role="tab" id="tabOrder" class="active">예배 순서 세팅</button>
-      <button type="button" role="tab" id="tabHymn">찬송 세팅</button>
-      <button type="button" role="tab" id="tabSermon">말씀 세팅</button>
-      <button type="button" role="tab" id="tabExport">내보내기</button>
+    <header class="header">
+      <p class="logo">예배 자막 스튜디오</p>
+      <p class="tagline">늘푸른교회 · 순서 구성부터 PPT 제작까지 한 곳에서</p>
+    </header>
+    <nav class="tabs">
+      <button type="button" id="tabCaption" class="active">자막 생성</button>
+      <button type="button" id="tabHymn">찬송가 관리</button>
     </nav>
 
-    <!-- 1. 예배 순서 세팅 -->
-    <section id="panelOrder" class="panel active">
-      <div class="card">
-        <h2>오늘의 예배 순서</h2>
-        <p class="msg" style="color:var(--muted)">아래 버튼으로 항목을 추가하고, 찬송 세팅에서 검색해 넣을 수 있습니다. 말씀 구간은 말씀 세팅에서 채웁니다.</p>
-        <div class="btn-group">
-          <button type="button" class="btn outline sm" id="btnLoadTemplate">기본 순서 불러오기</button>
+    <!-- 탭 1: 자막 생성 -->
+    <section id="panelCaption" class="panel active">
+      <div class="section">
+        <h2 class="section-title">항목 추가</h2>
+        <p class="section-desc">예배에 넣을 슬라이드 유형을 고른 뒤, 내용을 채워 추가하세요.</p>
+        <div class="add-type-row">
+          <select id="addTypeSelect" class="type-select">
+            <option value="">유형 선택</option>
+            <option value="image">이미지</option>
+            <option value="blank">빈 칸</option>
+            <option value="hymn">찬송</option>
+            <option value="card">카드</option>
+            <option value="sermon">말씀</option>
+          </select>
+          <div class="form-inline" id="addTypeInline"></div>
         </div>
-        <div class="btn-group">
-          <button type="button" class="btn sm" data-type="image" data-src="2026.png" data-text="주일 1부 예배">이미지 (1부)</button>
-          <button type="button" class="btn sm" data-type="image" data-src="2026.png" data-text="주일 2부 예배">이미지 (2부)</button>
-          <button type="button" class="btn sm" data-type="blank">빈 슬라이드</button>
-          <button type="button" class="btn sm" data-type="hymn">찬송 추가</button>
-          <button type="button" class="btn sm" data-type="card" data-text="성가대 찬양">카드 (성가대)</button>
-          <button type="button" class="btn sm" data-type="card" data-text="통성기도" data-bg="000000">카드 (통성기도)</button>
-          <button type="button" class="btn sm" data-type="card" data-text="대표기도">카드 (대표기도)</button>
-          <button type="button" class="btn sm" data-type="sermon_block">말씀 구간</button>
-          <button type="button" class="btn sm" data-type="card" data-text="광고">카드 (광고)</button>
-          <button type="button" class="btn sm" data-type="card" data-text="축도">카드 (축도)</button>
+        <div id="addTypeFormImage" class="add-type-form">
+          <label>기본 이미지 또는 파일명</label>
+          <select id="imagePreset">
+            <option value="2026.png">2026.png (1·2부)</option>
+            <option value="2026_신앙고백1.JPG">2026_신앙고백1.JPG</option>
+            <option value="2026_신앙고백2.JPG">2026_신앙고백2.JPG</option>
+            <option value="">— 직접 입력 —</option>
+          </select>
+          <label style="margin-top:8px">이미지 위 텍스트 (선택)</label>
+          <input type="text" id="imageText" placeholder="예: 주일 1부 예배" />
+          <div id="imageCustomWrap" style="display:none; margin-top:8px">
+            <label>파일명 (image 폴더에 있는 파일)</label>
+            <input type="text" id="imageCustom" placeholder="예: 2026.png" />
+          </div>
+          <button type="button" class="btn sm" style="margin-top:10px" id="btnAddImage">추가</button>
         </div>
+        <div id="addTypeFormCard" class="add-type-form">
+          <label>카드에 표시할 텍스트</label>
+          <input type="text" id="cardText" placeholder="예: 통성기도, 성가대 찬양, 축도" />
+          <label style="margin-top:8px">배경 (선택) 검정=통성기도 등</label>
+          <select id="cardBg">
+            <option value="00FF00">기본(녹색)</option>
+            <option value="000000">검정</option>
+          </select>
+          <button type="button" class="btn sm" style="margin-top:10px" id="btnAddCard">추가</button>
+        </div>
+        <div id="addTypeFormHymn" class="add-type-form">
+          <p class="section-desc" style="margin-bottom:8px">찬송가 목록에서 곡을 선택하세요. (찬송가 관리 탭에서 목록을 불러와야 합니다)</p>
+          <button type="button" class="btn sm" id="btnOpenHymnPick">찬송 선택하기</button>
+        </div>
+        <div id="addTypeFormSermon" class="add-type-form">
+          <p class="section-desc" style="margin-bottom:10px">말씀 추가 방법을 선택하세요.</p>
+          <div class="btn-group">
+            <button type="button" class="btn outline sm" id="btnSermonWord">Word 파일 분석 → 자막에 추가</button>
+            <button type="button" class="btn outline sm" id="btnSermonManual">수동 추가 (성경 권 + 장:절)</button>
+          </div>
+          <div id="sermonWordArea" style="display:none; margin-top:12px; padding:12px; background:#fff; border-radius:8px; border:1px solid var(--border)">
+            <input type="file" id="docxFile" accept=".docx" />
+            <button type="button" class="btn sm" id="btnParse">원고 분석</button>
+            <button type="button" class="btn sm" id="btnAiCode">말씀 추출 후 자막에 추가</button>
+            <p id="parseMsg" style="font-size:0.85rem; margin-top:8px; color:var(--muted)"></p>
+          </div>
+          <div id="sermonManualArea" style="display:none; margin-top:12px; padding:12px; background:#fff; border-radius:8px; border:1px solid var(--border)">
+            <label>성경 권</label>
+            <select id="bibleBook"></select>
+            <label>장:절 (시작)</label>
+            <input type="text" id="bibleStart" placeholder="8:11" />
+            <label>장:절 (끝, 범위일 때만)</label>
+            <input type="text" id="bibleEnd" placeholder="비우면 한 절" />
+            <button type="button" class="btn sm" id="btnAddBibleVerse">본문 추가</button>
+            <label style="margin-top:12px">또는 부제(자막 텍스트)</label>
+            <input type="text" id="subtitleText" placeholder="예: 복음은 성령으로 (로마서 8:11)" />
+            <button type="button" class="btn sm" id="btnAddSubtitle">부제 추가</button>
+          </div>
+        </div>
+        <div id="addTypeFormBlank" class="add-type-form">
+          <button type="button" class="btn sm" id="btnAddBlank">빈 칸 추가</button>
+        </div>
+      </div>
+      <div class="section">
+        <h2 class="section-title">오늘의 자막 순서</h2>
+        <p class="section-desc">항목을 클릭하면 상세를 볼 수 있고, ↑↓로 순서를 바꿀 수 있습니다.</p>
+        <button type="button" class="btn outline sm" id="btnLoadTemplate">기본 순서 불러오기</button>
         <ul id="orderList" class="order-list"></ul>
+        <div class="order-empty" id="orderEmpty">
+          <strong>아직 항목이 없습니다</strong>
+          위에서 유형을 선택해 예배 순서를 채워 보세요.
+        </div>
       </div>
     </section>
 
-    <!-- 2. 찬송 세팅 -->
+    <!-- 탭 2: 찬송가 관리 -->
     <section id="panelHymn" class="panel">
-      <div class="card">
-        <h2>찬송가 목록 (GitHub 저장)</h2>
-        <label>찬송가 전체 (제목 → ------ → 가사, 곡 사이 빈 줄)</label>
-        <textarea id="hymnContent" placeholder="임재&#10;------&#10;가사..."></textarea>
+      <div class="section">
+        <h2 class="section-title">찬송가 불러오기 · 수정</h2>
+        <p class="section-desc">저장된 찬송가를 불러와 제목으로 검색한 뒤, 가사를 수정하고 다시 저장할 수 있습니다.</p>
+        <div class="hymn-select-row">
+          <div class="search-wrap">
+            <label>제목으로 검색 · 선택</label>
+            <input type="text" id="hymnSearchTitle" placeholder="찬송 제목 입력 후 목록에서 선택..." list="hymnDatalist" autocomplete="off" />
+            <datalist id="hymnDatalist"></datalist>
+          </div>
+          <button type="button" class="btn outline sm" id="btnHymnLoad">목록 불러오기</button>
+        </div>
+        <label>내용 (가사) — 제목 선택 시 해당 곡만 로드됩니다</label>
+        <textarea id="hymnContent" placeholder="제목을 선택하면 여기에 가사가 로드됩니다. 수정 후 저장하세요."></textarea>
+        <p class="hymn-line-hint" id="hymnLineHint"></p>
         <label style="margin-top:12px">인도 찬송 5곡 (한 줄에 한 곡)</label>
-        <textarea id="hymnIntro" style="min-height:80px" placeholder="임재&#10;좋으신 하나님&#10;..."></textarea>
+        <textarea id="hymnIntro" style="min-height:72px" placeholder="임재&#10;좋으신 하나님&#10;..."></textarea>
         <div class="btn-group">
-          <button type="button" class="btn" id="btnHymnLoad">불러오기</button>
-          <button type="button" class="btn" id="btnHymnSave">GitHub에 저장</button>
+          <button type="button" class="btn" id="btnHymnSave">저장</button>
         </div>
-        <p id="hymnStatus" class="msg"></p>
       </div>
-      <div class="card">
-        <h2>찬송 검색 → 예배 순서에 넣기</h2>
-        <div class="search-box">
-          <input type="text" id="hymnSearch" placeholder="찬송 제목 검색..." />
-        </div>
-        <div id="hymnResults" class="hymn-results"></div>
-        <p class="msg" style="color:var(--muted)">검색 결과에서 찬송을 클릭하면 예배 순서 맨 뒤에 추가됩니다.</p>
-      </div>
-    </section>
-
-    <!-- 3. 말씀 세팅 -->
-    <section id="panelSermon" class="panel">
-      <div class="card">
-        <h2>말씀 (본문/부제/구절)</h2>
-        <p class="msg" style="color:var(--muted)">원고 DOCX를 올린 뒤 AI 도움을 받거나, 아래에서 직접 추가·수정하세요.</p>
-        <input type="file" id="docxFile" accept=".docx" />
-        <div class="btn-group">
-          <button type="button" class="btn" id="btnParse">파싱하기</button>
-          <button type="button" class="btn" id="btnAiCode">AI 도움받기</button>
-        </div>
-        <p id="parseMsg" class="msg"></p>
-        <div class="btn-group" style="margin-top:16px">
-          <button type="button" class="btn outline sm" id="btnAddBible">말씀 구절 추가</button>
-          <button type="button" class="btn outline sm" id="btnAddSubtitle">말씀 부제 추가</button>
-        </div>
-        <div id="bibleForm" class="card" style="display:none; margin-top:12px; background: var(--accent-light);">
-          <label>성경 책</label>
-          <input type="text" id="bibleBook" placeholder="예: 로마서" />
-          <label>장:절 (시작)</label>
-          <input type="text" id="bibleStart" placeholder="예: 8:11" />
-          <label>장:절 (끝, 구절 범위일 때만)</label>
-          <input type="text" id="bibleEnd" placeholder="비우면 한 절" />
-          <button type="button" class="btn sm" id="bibleFormSubmit">추가</button>
-        </div>
-        <div id="subtitleForm" class="card" style="display:none; margin-top:12px; background: var(--accent-light);">
-          <label>부제 텍스트</label>
-          <input type="text" id="subtitleText" placeholder="예: 복음은 성령으로 나를 살게 한다 (로마서 8:11)" />
-          <button type="button" class="btn sm" id="subtitleFormSubmit">추가</button>
-        </div>
-        <ul id="sermonList" class="sermon-items" style="margin-top:12px"></ul>
-      </div>
-    </section>
-
-    <!-- 4. 내보내기 -->
-    <section id="panelExport" class="panel">
-      <div class="card">
-        <h2>PPTX 생성</h2>
-        <p class="msg" style="color:var(--muted)">예배 순서·찬송·말씀을 반영해 파일을 만듭니다. 찬송가 목록은 위 찬송 세팅에서 불러온 내용이 사용됩니다.</p>
-        <button type="button" class="btn" id="btnExport">PPTX 다운로드</button>
-        <p id="exportMsg" class="msg"></p>
+      <div class="section hymn-add-new">
+        <h2 class="section-title">새 찬송 추가</h2>
+        <label>제목</label>
+        <input type="text" id="hymnNewTitle" placeholder="찬송 제목" />
+        <label>내용 (가사)</label>
+        <textarea id="hymnNewContent" placeholder="가사 입력. 제목과 내용 사이는 ------ 로 구분해 저장됩니다." style="min-height:120px"></textarea>
+        <button type="button" class="btn sm" id="btnHymnAddNew">추가</button>
       </div>
     </section>
   </div>
 
+  <!-- 찬송 선택 모달 (자막에 넣기) -->
+  <div class="overlay" id="hymnPickModal">
+    <div class="modal">
+      <h3>찬송 선택</h3>
+      <input type="text" class="modal-search" id="hymnPickSearch" placeholder="제목 검색..." autocomplete="off" />
+      <div class="modal-list" id="hymnPickList"></div>
+      <div class="modal-actions"><button type="button" class="btn outline sm" id="hymnPickClose">취소</button></div>
+    </div>
+  </div>
+
+  <!-- 상세 보기 팝업 (항목 클릭 시) -->
+  <div class="overlay" id="detailModal">
+    <div class="modal">
+      <h3 id="detailTitle">상세</h3>
+      <div class="modal-body" id="detailBody"></div>
+      <div class="modal-actions"><button type="button" class="btn outline sm" id="detailClose">닫기</button></div>
+    </div>
+  </div>
+
+  <!-- 삭제 확인 -->
+  <div class="overlay" id="deleteConfirmModal">
+    <div class="modal" onclick="event.stopPropagation()">
+      <h3>항목 삭제</h3>
+      <p class="section-desc">이 항목을 목록에서 삭제할까요?</p>
+      <div class="modal-actions">
+        <button type="button" class="btn outline sm" id="deleteConfirmCancel">취소</button>
+        <button type="button" class="btn sm danger" id="deleteConfirmOk">삭제</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Word 분석 후 추가 확인 모달 -->
+  <div class="overlay" id="confirmAddModal">
+    <div class="modal">
+      <h3>자막에 추가</h3>
+      <p class="section-desc">분석된 말씀 목록을 현재 자막에 추가하시겠습니까?</p>
+      <div class="modal-actions">
+        <button type="button" class="btn outline sm" id="confirmAddCancel">취소</button>
+        <button type="button" class="btn sm" id="confirmAddOk">추가</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="cta-bar" id="ctaBar">
+    <span class="summary" id="ctaSummary">자막을 추가한 뒤 PPT를 만들 수 있습니다.</span>
+    <button type="button" class="btn" id="btnExport">PPT 만들기</button>
+  </div>
+  <div class="toast" id="toast"></div>
+
   <script>
     const KEY_ORDER = "egchurch_worship_order";
     const KEY_SERMON = "egchurch_sermon_items";
+    const BIBLE_BOOKS = ["창세기","출애굽기","레위기","민수기","신명기","여호수아","사사기","룻기","사무엘상","사무엘하","열왕기상","열왕기하","역대상","역대하","에스라","느헤미야","에스더","욥기","시편","잠언","전도서","아가","이사야","예레미야","예레미야애가","에스겔","다니엘","호세아","요엘","아모스","오바댜","요나","미가","나훔","하박국","스바냐","학개","스가랴","말라기","마태복음","마가복음","누가복음","요한복음","사도행전","로마서","고린도전서","고린도후서","갈라디아서","에베소서","빌립보서","골로새서","데살로니가전서","데살로니가후서","디모데전서","디모데후서","디도서","빌레몬서","히브리서","야고보서","베드로전서","베드로후서","요한일서","요한이서","요한삼서","유다서","요한계시록"];
 
     let worshipOrder = [];
     let sermonItems = [];
     let lastParsed = null;
     let hymnTitles = [];
+    let hymnMap = {};
+    let pendingSermonItems = [];
+    let currentSelectedHymnTitle = null;
+    let hymnMaxLineLen = 0;
+
+    function showToast(msg, type) {
+      const el = document.getElementById("toast");
+      el.textContent = msg;
+      el.className = "toast show " + (type || "ok");
+      clearTimeout(el._t);
+      el._t = setTimeout(() => el.classList.remove("show"), 2800);
+    }
 
     function loadOrder() {
       try {
@@ -229,377 +339,9 @@
         if (s) worshipOrder = JSON.parse(s);
       } catch (_) {}
       if (!Array.isArray(worshipOrder)) worshipOrder = [];
+      if (worshipOrder.length === 0) loadDefaultOrder();
     }
-    function saveOrder() {
-      try { localStorage.setItem(KEY_ORDER, JSON.stringify(worshipOrder)); } catch (_) {}
-      renderOrder();
-    }
-    function loadSermon() {
-      try {
-        const s = localStorage.getItem(KEY_SERMON);
-        if (s) sermonItems = JSON.parse(s);
-      } catch (_) {}
-      if (!Array.isArray(sermonItems)) sermonItems = [];
-    }
-    function saveSermon() {
-      try { localStorage.setItem(KEY_SERMON, JSON.stringify(sermonItems)); } catch (_) {}
-      renderSermon();
-    }
-
-    const typeLabel = { image: "이미지", blank: "빈칸", hymn: "찬송", card: "카드", bible: "본문", subtitle: "부제", sermon_block: "말씀구간" };
-    function renderOrder() {
-      const ul = document.getElementById("orderList");
-      ul.innerHTML = worshipOrder.map((item, i) => {
-        const t = item.type || "";
-        let badge = typeLabel[t] || t, text = "";
-        if (t === "image") text = (item.text || item.src || "");
-        else if (t === "hymn") text = item.title || "(찬송 선택)";
-        else if (t === "card") text = item.text || "";
-        else if (t === "bible") text = [item.book, item.start, item.end].filter(Boolean).join(" ");
-        else if (t === "subtitle") text = item.text || "";
-        else if (t === "sermon_block") text = "말씀 세팅에서 채움";
-        else if (t === "blank") text = "빈 슬라이드";
-        return `<li data-i="${i}">
-          <span class="badge ${t}">${badge}</span>
-          <span class="text">${text || "-"}</span>
-          <span class="order-actions">
-            <button type="button" class="btn sm outline" data-action="up" aria-label="위로">↑</button>
-            <button type="button" class="btn sm outline" data-action="down" aria-label="아래로">↓</button>
-            <button type="button" class="remove" aria-label="삭제">×</button>
-          </span>
-        </li>`;
-      }).join("");
-      ul.querySelectorAll(".remove").forEach(btn => {
-        btn.addEventListener("click", () => {
-          const i = parseInt(btn.closest("li").dataset.i, 10);
-          worshipOrder.splice(i, 1);
-          saveOrder();
-        });
-      });
-      ul.querySelectorAll("[data-action=up]").forEach(btn => {
-        btn.addEventListener("click", () => {
-          const i = parseInt(btn.closest("li").dataset.i, 10);
-          if (i > 0) { worshipOrder.splice(i - 1, 2, worshipOrder[i], worshipOrder[i - 1]); saveOrder(); }
-        });
-      });
-      ul.querySelectorAll("[data-action=down]").forEach(btn => {
-        btn.addEventListener("click", () => {
-          const i = parseInt(btn.closest("li").dataset.i, 10);
-          if (i < worshipOrder.length - 1) { worshipOrder.splice(i, 2, worshipOrder[i + 1], worshipOrder[i]); saveOrder(); }
-        });
-      });
-    }
-
-    function addOrderItem(item) {
-      worshipOrder.push(item);
-      saveOrder();
-    }
-
-    document.querySelectorAll("#panelOrder .btn[data-type]").forEach(btn => {
-      btn.addEventListener("click", () => {
-        const type = btn.dataset.type;
-        const item = { type };
-        if (type === "image") {
-          item.src = btn.dataset.src || "2026.png";
-          item.text = btn.dataset.text || "";
-        } else if (type === "card") {
-          item.text = btn.dataset.text || "";
-          if (btn.dataset.bg) item.bgColor = btn.dataset.bg;
-        } else if (type === "hymn") {
-          item.title = "(찬송 선택)";
-        }
-        addOrderItem(item);
-      });
-    });
-
-    function renderSermon() {
-      const ul = document.getElementById("sermonList");
-      ul.innerHTML = sermonItems.map((item, i) => {
-        const t = item.type || "";
-        const tLabel = t === "bible" ? "본문" : t === "subtitle" ? "부제" : t;
-        let detail = "";
-        if (t === "bible") detail = `${item.book || ""} ${item.start || ""} ${item.end ? "~" + item.end : ""}`;
-        else if (t === "subtitle") detail = item.text || "";
-        return `<li class="item" data-i="${i}">
-          <span class="badge ${t}">${tLabel}</span>
-          <span class="detail">${detail}</span>
-          <span class="order-actions">
-            <button type="button" class="btn sm outline" data-action="up">↑</button>
-            <button type="button" class="btn sm outline" data-action="down">↓</button>
-            <button type="button" class="remove sm">×</button>
-          </span>
-        </li>`;
-      }).join("");
-      ul.querySelectorAll(".remove").forEach(btn => {
-        btn.addEventListener("click", () => {
-          const i = parseInt(btn.closest("li").dataset.i, 10);
-          sermonItems.splice(i, 1);
-          saveSermon();
-        });
-      });
-      ul.querySelectorAll("[data-action=up]").forEach(btn => {
-        btn.addEventListener("click", () => {
-          const i = parseInt(btn.closest("li").dataset.i, 10);
-          if (i > 0) { sermonItems.splice(i - 1, 2, sermonItems[i], sermonItems[i - 1]); saveSermon(); }
-        });
-      });
-      ul.querySelectorAll("[data-action=down]").forEach(btn => {
-        btn.addEventListener("click", () => {
-          const i = parseInt(btn.closest("li").dataset.i, 10);
-          if (i < sermonItems.length - 1) { sermonItems.splice(i, 2, sermonItems[i + 1], sermonItems[i]); saveSermon(); }
-        });
-      });
-    }
-
-    async function loadHymnFromApi() {
-      const status = document.getElementById("hymnStatus");
-      try {
-        const res = await fetch("/api/get_hymn_data");
-        const data = await res.json();
-        if (res.ok && data) {
-          document.getElementById("hymnContent").value = data.content || "";
-          document.getElementById("hymnIntro").value = data.intro || "";
-          status.textContent = "불러왔습니다.";
-          status.className = "msg ok";
-          parseHymnTitles();
-          return;
-        }
-      } catch (e) {
-        status.textContent = "불러오기 실패: " + (e.message || "네트워크 오류");
-        status.className = "msg err";
-        return;
-      }
-      status.textContent = "저장된 목록이 없습니다.";
-      status.className = "msg";
-    }
-
-    function parseHymnTitles() {
-      const raw = document.getElementById("hymnContent").value;
-      const blocks = raw.split("\n\n");
-      hymnTitles = [];
-      blocks.forEach(block => {
-        const first = block.split("\n")[0];
-        if (first && !first.startsWith("------")) hymnTitles.push(first.trim());
-      });
-    }
-
-    async function saveHymnToApi() {
-      const status = document.getElementById("hymnStatus");
-      status.textContent = "저장 중...";
-      status.className = "msg";
-      try {
-        const res = await fetch("/api/save_hymn_data", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            content: document.getElementById("hymnContent").value.trim(),
-            intro: document.getElementById("hymnIntro").value.trim(),
-          }),
-        });
-        const data = await res.json();
-        if (res.ok && data && data.ok) {
-          status.textContent = "GitHub에 저장되었습니다.";
-          status.className = "msg ok";
-          parseHymnTitles();
-          return;
-        }
-        status.textContent = data.detail || "저장 실패";
-        status.className = "msg err";
-      } catch (e) {
-        status.textContent = "저장 실패: " + (e.message || "");
-        status.className = "msg err";
-      }
-    }
-
-    document.getElementById("hymnContent").addEventListener("input", parseHymnTitles);
-    document.getElementById("btnHymnLoad").addEventListener("click", loadHymnFromApi);
-    document.getElementById("btnHymnSave").addEventListener("click", saveHymnToApi);
-
-    document.getElementById("hymnSearch").addEventListener("input", function() {
-      const q = this.value.trim().toLowerCase();
-      const list = document.getElementById("hymnResults");
-      if (!q) {
-        list.innerHTML = "";
-        return;
-      }
-      const matches = hymnTitles.filter(t => t.toLowerCase().includes(q));
-      if (hymnTitles.length === 0) {
-        list.innerHTML = "<p class=\"msg\" style=\"color:var(--muted)\">찬송가 내용을 입력한 뒤 &#39;불러오기&#39; 또는 저장 후 사용하세요.</p>";
-        return;
-      }
-      list.innerHTML = matches.length === 0
-        ? "<p class=\"msg\" style=\"color:var(--muted)\">검색 결과가 없습니다.</p>"
-        : matches.slice(0, 20).map(title =>
-            `<div class="item" data-title="${title.replace(/"/g, "&quot;")}">${title}</div>`
-          ).join("");
-      list.querySelectorAll(".item[data-title]").forEach(el => {
-        el.addEventListener("click", () => {
-          addOrderItem({ type: "hymn", title: el.dataset.title });
-          document.getElementById("hymnSearch").value = "";
-          list.innerHTML = "";
-        });
-      });
-    });
-
-    document.getElementById("btnParse").addEventListener("click", async () => {
-      const file = document.getElementById("docxFile").files[0];
-      const msg = document.getElementById("parseMsg");
-      if (!file) {
-        msg.textContent = "DOCX 파일을 선택하세요.";
-        msg.className = "msg err";
-        return;
-      }
-      const form = new FormData();
-      form.append("file", file);
-      try {
-        const res = await fetch("/api/parse_docx", { method: "POST", body: form });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.detail || "파싱 실패");
-        lastParsed = data.parsed;
-        msg.textContent = "파싱 완료. 이제 'AI 도움받기'를 누르면 말씀 구절이 생성됩니다.";
-        msg.className = "msg ok";
-      } catch (e) {
-        msg.textContent = e.message || "실패";
-        msg.className = "msg err";
-      }
-    });
-
-    document.getElementById("btnAiCode").addEventListener("click", async () => {
-      const msg = document.getElementById("parseMsg");
-      if (!lastParsed) {
-        msg.textContent = "먼저 DOCX를 업로드하고 파싱하세요.";
-        msg.className = "msg err";
-        return;
-      }
-      msg.textContent = "AI 생성 중...";
-      msg.className = "msg";
-      try {
-        const res = await fetch("/api/generate_sermon_code", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ parsed: lastParsed }),
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.detail || "생성 실패");
-        const code = (data.code || "").trim();
-        const lines = code.split("\n").filter(l => l.trim());
-        sermonItems = [];
-        lines.forEach(line => {
-          const mBible = line.match(/add_bible_slide\s*\([^,]+,[^,]+,\s*["']([^"']+)["'],\s*["']([^"']+)["'](?:,\s*["']([^"']*)["'])?/);
-          const mSub = line.match(/add_subtitle_slide\s*\([^,]+,\s*input_text\s*=\s*["']([^"']*)["']/);
-          if (mBible) {
-            sermonItems.push({ type: "bible", book: mBible[1], start: mBible[2], end: (mBible[3] || "").trim() });
-          } else if (mSub) {
-            sermonItems.push({ type: "subtitle", text: mSub[1] });
-          }
-        });
-        saveSermon();
-        msg.textContent = "말씀 목록에 반영되었습니다. 필요하면 추가/수정하세요.";
-        msg.className = "msg ok";
-      } catch (e) {
-        msg.textContent = e.message || "실패";
-        msg.className = "msg err";
-      }
-    });
-
-    const bibleForm = document.getElementById("bibleForm");
-    const subtitleForm = document.getElementById("subtitleForm");
-    document.getElementById("btnAddBible").addEventListener("click", () => {
-      subtitleForm.style.display = "none";
-      bibleForm.style.display = bibleForm.style.display ? "none" : "block";
-    });
-    document.getElementById("btnAddSubtitle").addEventListener("click", () => {
-      bibleForm.style.display = "none";
-      subtitleForm.style.display = subtitleForm.style.display ? "none" : "block";
-    });
-    document.getElementById("bibleFormSubmit").addEventListener("click", () => {
-      const book = document.getElementById("bibleBook").value.trim();
-      const start = document.getElementById("bibleStart").value.trim();
-      const end = document.getElementById("bibleEnd").value.trim();
-      if (book && start) {
-        sermonItems.push({ type: "bible", book, start, end });
-        saveSermon();
-        document.getElementById("bibleBook").value = "";
-        document.getElementById("bibleStart").value = "";
-        document.getElementById("bibleEnd").value = "";
-        bibleForm.style.display = "none";
-      }
-    });
-    document.getElementById("subtitleFormSubmit").addEventListener("click", () => {
-      const text = document.getElementById("subtitleText").value.trim();
-      if (text) {
-        sermonItems.push({ type: "subtitle", text });
-        saveSermon();
-        document.getElementById("subtitleText").value = "";
-        subtitleForm.style.display = "none";
-      }
-    });
-
-    function flattenOrder() {
-      const out = [];
-      worshipOrder.forEach(item => {
-        if (item.type === "sermon_block") {
-          sermonItems.forEach(s => {
-            if (s.type === "bible") out.push({ type: "bible", book: s.book, start: s.start, end: s.end || s.start });
-            else if (s.type === "subtitle") out.push({ type: "subtitle", text: s.text });
-          });
-        } else {
-          out.push({ ...item });
-        }
-      });
-      return out;
-    }
-
-    document.getElementById("btnExport").addEventListener("click", async () => {
-      const msg = document.getElementById("exportMsg");
-      const flat = flattenOrder();
-      if (flat.length === 0) {
-        msg.textContent = "예배 순서를 먼저 세팅하세요.";
-        msg.className = "msg err";
-        return;
-      }
-      const content = document.getElementById("hymnContent").value.trim();
-      msg.textContent = "생성 중...";
-      msg.className = "msg";
-      try {
-        const res = await fetch("/api/generate_pptx", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            worship_order: flat,
-            hymn_txt_content: content || "",
-          }),
-        });
-        if (!res.ok) {
-          const err = await res.json().catch(() => ({}));
-          throw new Error(err.detail || res.statusText);
-        }
-        const blob = await res.blob();
-        const name = (res.headers.get("content-disposition") || "").match(/filename="?([^";]+)"?/)?.[1] || "예배.pptx";
-        const a = document.createElement("a");
-        a.href = URL.createObjectURL(blob);
-        a.download = name;
-        a.click();
-        URL.revokeObjectURL(a.href);
-        msg.textContent = "다운로드되었습니다.";
-        msg.className = "msg ok";
-      } catch (e) {
-        msg.textContent = e.message || "실패";
-        msg.className = "msg err";
-      }
-    });
-
-    document.querySelectorAll(".tabs button").forEach((btn, idx) => {
-      btn.addEventListener("click", () => {
-        document.querySelectorAll(".tabs button").forEach(b => b.classList.remove("active"));
-        document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
-        btn.classList.add("active");
-        document.querySelectorAll(".panel")[idx].classList.add("active");
-        if (idx === 1) loadHymnFromApi();
-      });
-    });
-
-    document.getElementById("btnLoadTemplate").addEventListener("click", () => {
+    function loadDefaultOrder() {
       worshipOrder = [
         { type: "image", src: "2026.png", text: "주일 1부 예배" },
         { type: "image", src: "2026.png", text: "주일 2부 예배" },
@@ -623,14 +365,422 @@
         { type: "hymn", title: "우리 오늘 눈물로" },
         { type: "card", text: "축도" },
       ];
+    }
+    function saveOrder() {
+      try { localStorage.setItem(KEY_ORDER, JSON.stringify(worshipOrder)); } catch (_) {}
+      renderOrder();
+      updateCtaSummary();
+    }
+    function loadSermon() {
+      try {
+        const s = localStorage.getItem(KEY_SERMON);
+        if (s) sermonItems = JSON.parse(s);
+      } catch (_) {}
+      if (!Array.isArray(sermonItems)) sermonItems = [];
+    }
+    function saveSermon() {
+      try { localStorage.setItem(KEY_SERMON, JSON.stringify(sermonItems)); } catch (_) {}
+      renderOrder();
+      updateCtaSummary();
+    }
+    function countSlides() {
+      let n = 0;
+      worshipOrder.forEach(item => {
+        if (item.type === "sermon_block") n += sermonItems.length;
+        else n += 1;
+      });
+      return n;
+    }
+    function updateCtaSummary() {
+      const total = countSlides();
+      document.getElementById("ctaSummary").textContent = total === 0 ? "순서를 채운 뒤 PPT를 만들어 보세요." : "총 " + total + "장 슬라이드";
+    }
+
+    const typeLabel = { image: "이미지", blank: "빈칸", hymn: "찬송", card: "카드", bible: "본문", subtitle: "부제", sermon_block: "말씀" };
+    function renderOrder() {
+      const ul = document.getElementById("orderList");
+      ul.classList.toggle("empty", worshipOrder.length === 0);
+      ul.innerHTML = worshipOrder.map((item, i) => {
+        const t = item.type || "";
+        let badge = typeLabel[t] || t, text = "";
+        if (t === "image") text = item.text || item.src || "";
+        else if (t === "hymn") text = item.title || "(찬송 선택)";
+        else if (t === "card") text = item.text || "";
+        else if (t === "bible") text = [item.book, item.start, item.end].filter(Boolean).join(" ");
+        else if (t === "subtitle") text = item.text || "";
+        else if (t === "sermon_block") text = "설교 말씀 " + sermonItems.length + "개";
+        else if (t === "blank") text = "빈 슬라이드";
+        return `<li data-i="${i}" data-type="${t}">\n<span class="badge ${t}">${badge}</span>\n<span class="text">${text || "-"}</span>\n<span class="row-actions" onclick="event.stopPropagation()">\n<button type="button" class="btn sm outline" data-action="up">↑</button>\n<button type="button" class="btn sm outline" data-action="down">↓</button>\n<button type="button" class="remove">×</button>\n</span>\n</li>`;
+      }).join("");
+      ul.querySelectorAll("li").forEach(li => {
+        li.addEventListener("click", e => {
+          if (e.target.closest(".row-actions")) return;
+          showDetail(parseInt(li.dataset.i, 10));
+        });
+      });
+      let deleteTargetIndex = null;
+      ul.querySelectorAll(".remove").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          deleteTargetIndex = parseInt(btn.closest("li").dataset.i, 10);
+          document.getElementById("deleteConfirmModal").classList.add("open");
+        });
+      });
+      window._confirmDelete = function(ok) {
+        document.getElementById("deleteConfirmModal").classList.remove("open");
+        if (ok && deleteTargetIndex != null) {
+          worshipOrder.splice(deleteTargetIndex, 1);
+          saveOrder();
+          showToast("삭제되었습니다.");
+        }
+        deleteTargetIndex = null;
+      };
+      ul.querySelectorAll("[data-action=up]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const i = parseInt(btn.closest("li").dataset.i, 10);
+          if (i > 0) { worshipOrder.splice(i - 1, 2, worshipOrder[i], worshipOrder[i - 1]); saveOrder(); }
+        });
+      });
+      ul.querySelectorAll("[data-action=down]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const i = parseInt(btn.closest("li").dataset.i, 10);
+          if (i < worshipOrder.length - 1) { worshipOrder.splice(i, 2, worshipOrder[i + 1], worshipOrder[i]); saveOrder(); }
+        });
+      });
+    }
+
+    async function showDetail(i) {
+      const item = worshipOrder[i];
+      const modal = document.getElementById("detailModal");
+      const titleEl = document.getElementById("detailTitle");
+      const bodyEl = document.getElementById("detailBody");
+      const t = item.type || "";
+      if (t === "hymn") {
+        titleEl.textContent = item.title || "(찬송)";
+        bodyEl.textContent = hymnMap[item.title] || "가사 정보가 없습니다. 찬송가 관리에서 목록을 불러오세요.";
+        bodyEl.classList.remove("loading");
+        modal.classList.add("open");
+      } else if (t === "bible" || t === "subtitle") {
+        titleEl.textContent = t === "bible" ? (item.book + " " + item.start + (item.end && item.end !== item.start ? "~" + item.end : "")) : "부제";
+        if (t === "subtitle") {
+          bodyEl.textContent = item.text || "";
+          bodyEl.classList.remove("loading");
+          modal.classList.add("open");
+        } else {
+          bodyEl.textContent = "불러오는 중…";
+          bodyEl.classList.add("loading");
+          modal.classList.add("open");
+          try {
+            const res = await fetch("/api/get_bible_verse?book=" + encodeURIComponent(item.book) + "&start=" + encodeURIComponent(item.start) + "&end=" + encodeURIComponent(item.end || item.start));
+            const d = await res.json();
+            bodyEl.textContent = d.text || "구절을 찾을 수 없습니다.";
+          } catch (_) {
+            bodyEl.textContent = "불러오기 실패";
+          }
+          bodyEl.classList.remove("loading");
+        }
+      } else if (t === "card") {
+        titleEl.textContent = "카드";
+        bodyEl.textContent = item.text || "(내용 없음)";
+        bodyEl.classList.remove("loading");
+        modal.classList.add("open");
+      } else if (t === "image") {
+        titleEl.textContent = "이미지";
+        bodyEl.textContent = "파일: " + (item.src || "") + (item.text ? "\n텍스트: " + item.text : "");
+        bodyEl.classList.remove("loading");
+        modal.classList.add("open");
+      } else if (t === "sermon_block") {
+        titleEl.textContent = "말씀 구간 (" + sermonItems.length + "개)";
+        bodyEl.textContent = sermonItems.map((s, j) => (s.type === "bible" ? "[본문] " + s.book + " " + s.start + (s.end && s.end !== s.start ? "~" + s.end : "") : "[부제] " + (s.text || ""))).join("\n") || "추가된 말씀이 없습니다.";
+        bodyEl.classList.remove("loading");
+        modal.classList.add("open");
+      } else {
+        titleEl.textContent = typeLabel[t] || t;
+        bodyEl.textContent = "-";
+        modal.classList.add("open");
+      }
+    }
+    document.getElementById("detailClose").addEventListener("click", () => document.getElementById("detailModal").classList.remove("open"));
+    document.getElementById("detailModal").addEventListener("click", e => { if (e.target.id === "detailModal") e.target.classList.remove("open"); });
+
+    document.getElementById("deleteConfirmCancel").addEventListener("click", () => window._confirmDelete(false));
+    document.getElementById("deleteConfirmOk").addEventListener("click", () => window._confirmDelete(true));
+    document.getElementById("deleteConfirmModal").addEventListener("click", (e) => { if (e.target.id === "deleteConfirmModal") window._confirmDelete(false); });
+    document.addEventListener("keydown", (e) => {
+      if (e.key !== "Escape") return;
+      const open = document.querySelector(".overlay.open");
+      if (open) {
+        open.classList.remove("open");
+        if (open.id === "deleteConfirmModal" && window._confirmDelete) window._confirmDelete(false);
+      }
+    });
+
+    document.getElementById("addTypeSelect").addEventListener("change", function() {
+      document.querySelectorAll(".add-type-form").forEach(f => f.classList.remove("visible"));
+      const v = this.value;
+      if (v === "image") document.getElementById("addTypeFormImage").classList.add("visible");
+      else if (v === "card") document.getElementById("addTypeFormCard").classList.add("visible");
+      else if (v === "hymn") document.getElementById("addTypeFormHymn").classList.add("visible");
+      else if (v === "sermon") document.getElementById("addTypeFormSermon").classList.add("visible");
+      else if (v === "blank") document.getElementById("addTypeFormBlank").classList.add("visible");
+    });
+    document.getElementById("imagePreset").addEventListener("change", function() {
+      document.getElementById("imageCustomWrap").style.display = this.value === "" ? "block" : "none";
+    });
+
+    document.getElementById("btnAddImage").addEventListener("click", () => {
+      const preset = document.getElementById("imagePreset").value;
+      const custom = document.getElementById("imageCustom").value.trim();
+      const src = preset || custom || "2026.png";
+      const text = document.getElementById("imageText").value.trim();
+      worshipOrder.push({ type: "image", src, text });
       saveOrder();
+      showToast("이미지를 순서에 추가했습니다.");
+    });
+    document.getElementById("btnAddCard").addEventListener("click", () => {
+      const text = document.getElementById("cardText").value.trim();
+      if (!text) { showToast("카드에 표시할 텍스트를 입력해 주세요.", "err"); return; }
+      const bg = document.getElementById("cardBg").value;
+      worshipOrder.push({ type: "card", text, bgColor: bg });
+      saveOrder();
+      showToast("카드를 순서에 추가했습니다.");
+    });
+    document.getElementById("btnAddBlank").addEventListener("click", () => {
+      worshipOrder.push({ type: "blank" });
+      saveOrder();
+      showToast("빈 칸을 추가했습니다.");
+    });
+
+    const hymnPickModal = document.getElementById("hymnPickModal");
+    const hymnPickList = document.getElementById("hymnPickList");
+    const hymnPickSearch = document.getElementById("hymnPickSearch");
+    function fillHymnPickList() {
+      const q = hymnPickSearch.value.trim().toLowerCase();
+      const list = hymnTitles.filter(t => t.toLowerCase().includes(q)).slice(0, 50);
+      hymnPickList.innerHTML = list.length ? list.map(t => `<div class="item" data-title="${t.replace(/"/g, "&quot;")}">${t}</div>`).join("") : "<p style='padding:12px;color:var(--muted)'>" + (hymnTitles.length ? "검색 결과 없음" : "찬송가 관리 탭에서 목록을 불러오세요.") + "</p>";
+      hymnPickList.querySelectorAll(".item[data-title]").forEach(el => {
+        el.addEventListener("click", () => {
+          worshipOrder.push({ type: "hymn", title: el.dataset.title });
+          saveOrder();
+          hymnPickModal.classList.remove("open");
+          showToast("찬송을 순서에 추가했습니다.");
+        });
+      });
+    }
+    document.getElementById("btnOpenHymnPick").addEventListener("click", () => { hymnPickSearch.value = ""; fillHymnPickList(); hymnPickModal.classList.add("open"); hymnPickSearch.focus(); });
+    hymnPickSearch.addEventListener("input", fillHymnPickList);
+    document.getElementById("hymnPickClose").addEventListener("click", () => hymnPickModal.classList.remove("open"));
+
+    document.getElementById("btnSermonWord").addEventListener("click", () => {
+      document.getElementById("sermonManualArea").style.display = "none";
+      document.getElementById("sermonWordArea").style.display = document.getElementById("sermonWordArea").style.display ? "none" : "block";
+    });
+    document.getElementById("btnSermonManual").addEventListener("click", () => {
+      document.getElementById("sermonWordArea").style.display = "none";
+      document.getElementById("sermonManualArea").style.display = document.getElementById("sermonManualArea").style.display ? "none" : "block";
+    });
+    document.getElementById("btnParse").addEventListener("click", async () => {
+      const file = document.getElementById("docxFile").files[0];
+      if (!file) { showToast("DOCX 파일을 선택하세요.", "err"); return; }
+      try {
+        const form = new FormData();
+        form.append("file", file);
+        const r = await fetch("/api/parse_docx", { method: "POST", body: form });
+        const d = await r.json();
+        if (!r.ok) throw new Error(d.detail || "분석 실패");
+        lastParsed = d.parsed;
+        showToast("원고 분석 완료. '말씀 추출 후 자막에 추가'를 누르세요.");
+      } catch (e) { showToast(e.message || "실패", "err"); }
+    });
+    document.getElementById("btnAiCode").addEventListener("click", async () => {
+      if (!lastParsed) { showToast("먼저 원고 분석을 실행하세요.", "err"); return; }
+      showToast("말씀 추출 중…");
+      try {
+        const res = await fetch("/api/generate_sermon_code", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ parsed: lastParsed }) });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "실패");
+        const code = (data.code || "").trim();
+        const lines = code.split("\n").filter(l => l.trim());
+        pendingSermonItems = [];
+        lines.forEach(line => {
+          const mBible = line.match(/add_bible_slide\s*\([^,]+,[^,]+,\s*["']([^"']+)["'],\s*["']([^"']+)["'](?:,\s*["']([^"']*)["'])?/);
+          const mSub = line.match(/add_subtitle_slide\s*\([^,]+,\s*input_text\s*=\s*["']([^"']*)["']/);
+          if (mBible) pendingSermonItems.push({ type: "bible", book: mBible[1], start: mBible[2], end: (mBible[3] || "").trim() });
+          else if (mSub) pendingSermonItems.push({ type: "subtitle", text: mSub[1] });
+        });
+        document.getElementById("confirmAddModal").classList.add("open");
+      } catch (e) { showToast(e.message || "실패", "err"); }
+    });
+    document.getElementById("confirmAddOk").addEventListener("click", () => {
+      sermonItems.push(...pendingSermonItems);
+      saveSermon();
+      document.getElementById("confirmAddModal").classList.remove("open");
+      showToast("말씀 " + pendingSermonItems.length + "개 추가됨");
+    });
+    document.getElementById("confirmAddCancel").addEventListener("click", () => document.getElementById("confirmAddModal").classList.remove("open"));
+
+    const bibleBookSelect = document.getElementById("bibleBook");
+    BIBLE_BOOKS.forEach(b => { const o = document.createElement("option"); o.value = b; o.textContent = b; bibleBookSelect.appendChild(o); });
+    document.getElementById("btnAddBibleVerse").addEventListener("click", () => {
+      const book = document.getElementById("bibleBook").value.trim();
+      const start = document.getElementById("bibleStart").value.trim();
+      const end = document.getElementById("bibleEnd").value.trim();
+      if (!book || !start) { showToast("성경 권과 장:절을 입력하세요.", "err"); return; }
+      sermonItems.push({ type: "bible", book, start, end: end || start });
+      saveSermon();
+      showToast("본문 추가됨");
+    });
+    document.getElementById("btnAddSubtitle").addEventListener("click", () => {
+      const text = document.getElementById("subtitleText").value.trim();
+      if (!text) { showToast("부제 텍스트를 입력하세요.", "err"); return; }
+      sermonItems.push({ type: "subtitle", text });
+      saveSermon();
+      showToast("부제 추가됨");
+    });
+
+    function parseHymnBlocks(raw) {
+      const blocks = raw.split("\n\n");
+      hymnTitles = [];
+      hymnMap = {};
+      let maxLineLen = 0;
+      blocks.forEach(block => {
+        const lines = block.split("\n");
+        let sepIdx = -1;
+        for (let i = 0; i < lines.length; i++) if (lines[i].trim() === "------") { sepIdx = i; break; }
+        if (sepIdx < 0) return;
+        const title = lines.slice(0, sepIdx).join("\n").trim();
+        const content = lines.slice(sepIdx + 1).join("\n").trim();
+        if (title) {
+          hymnTitles.push(title);
+          hymnMap[title] = content;
+          content.split("\n").forEach(l => { if (l.length > maxLineLen) maxLineLen = l.length; });
+        }
+      });
+      hymnMaxLineLen = maxLineLen;
+      return maxLineLen;
+    }
+    async function loadHymnFromApi() {
+      try {
+        const res = await fetch("/api/get_hymn_data");
+        const data = await res.json();
+        if (res.ok && data) {
+          const content = (data.content || "").trim();
+          const intro = (data.intro || "").trim();
+          document.getElementById("hymnIntro").value = intro;
+          parseHymnBlocks(content);
+          const datalist = document.getElementById("hymnDatalist");
+          datalist.innerHTML = hymnTitles.map(t => `<option value="${t.replace(/"/g, "&quot;")}">`).join("");
+          document.getElementById("hymnLineHint").textContent = hymnMaxLineLen ? "한 줄 최대 길이(참고): 약 " + hymnMaxLineLen + "자" : "";
+          return true;
+        }
+      } catch (_) {}
+      return false;
+    }
+    document.getElementById("btnHymnLoad").addEventListener("click", async () => {
+      const ok = await loadHymnFromApi();
+      if (ok) showToast("찬송가 목록을 불러왔습니다.");
+      else showToast("불러오기 실패 또는 저장된 목록 없음", "err");
+    });
+    document.getElementById("hymnSearchTitle").addEventListener("input", function() {
+      const title = this.value.trim();
+      if (hymnMap[title] !== undefined) {
+        currentSelectedHymnTitle = title;
+        document.getElementById("hymnContent").value = hymnMap[title];
+        document.getElementById("hymnLineHint").textContent = hymnMaxLineLen ? "한 줄 권장: 약 " + hymnMaxLineLen + "자 이내" : "";
+      }
+    });
+    document.getElementById("hymnSearchTitle").addEventListener("focus", function() {
+      if (hymnTitles.length && !this.value) this.placeholder = "찬송 제목 입력 또는 목록에서 선택";
+    });
+    document.getElementById("btnHymnSave").addEventListener("click", async () => {
+      const btn = document.getElementById("btnHymnSave");
+      if (currentSelectedHymnTitle) {
+        hymnMap[currentSelectedHymnTitle] = document.getElementById("hymnContent").value;
+      }
+      const fullContent = hymnTitles.map(t => t + "\n------\n" + (hymnMap[t] || "")).join("\n\n");
+      const intro = document.getElementById("hymnIntro").value.trim();
+      btn.disabled = true;
+      btn.classList.add("loading");
+      btn.textContent = "저장 중…";
+      try {
+        const res = await fetch("/api/save_hymn_data", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ content: fullContent, intro }) });
+        const data = await res.json();
+        if (res.ok && data && data.ok) { parseHymnBlocks(fullContent); showToast("찬송가가 저장되었습니다."); }
+        else showToast(data.detail || "저장에 실패했습니다. 다시 시도해 주세요.", "err");
+      } catch (e) { showToast("저장에 실패했습니다. 연결을 확인해 주세요.", "err"); }
+      finally { btn.disabled = false; btn.classList.remove("loading"); btn.textContent = "저장"; }
+    });
+    document.getElementById("btnHymnAddNew").addEventListener("click", () => {
+      const title = document.getElementById("hymnNewTitle").value.trim();
+      const content = document.getElementById("hymnNewContent").value.trim();
+      if (!title) { showToast("제목을 입력하세요.", "err"); return; }
+      if (hymnTitles.includes(title)) { showToast("이미 있는 제목입니다. 수정은 제목 검색 후 내용에서 하세요.", "err"); return; }
+      hymnTitles.push(title);
+      hymnMap[title] = content;
+      document.getElementById("hymnDatalist").innerHTML = hymnTitles.map(t => `<option value="${t.replace(/"/g, "&quot;")}">`).join("");
+      document.getElementById("hymnNewTitle").value = "";
+      document.getElementById("hymnNewContent").value = "";
+      currentSelectedHymnTitle = null;
+      document.getElementById("hymnContent").value = "";
+      showToast("새 찬송이 목록에 추가되었습니다. 저장을 눌러 반영하세요.");
+    });
+
+    document.getElementById("btnLoadTemplate").addEventListener("click", () => { loadDefaultOrder(); saveOrder(); showToast("기본 예배 순서를 불러왔습니다."); });
+
+    function flattenOrder() {
+      const out = [];
+      worshipOrder.forEach(item => {
+        if (item.type === "sermon_block") {
+          sermonItems.forEach(s => {
+            if (s.type === "bible") out.push({ type: "bible", book: s.book, start: s.start, end: s.end || s.start });
+            else if (s.type === "subtitle") out.push({ type: "subtitle", text: s.text });
+          });
+        } else out.push({ ...item });
+      });
+      return out;
+    }
+    document.getElementById("btnExport").addEventListener("click", async () => {
+      const flat = flattenOrder();
+      if (flat.length === 0) { showToast("예배 순서를 먼저 구성해 주세요.", "err"); return; }
+      const content = hymnTitles.length
+        ? hymnTitles.map(t => t + "\n------\n" + (hymnMap[t] || "")).join("\n\n")
+        : document.getElementById("hymnContent").value.trim();
+      const btn = document.getElementById("btnExport");
+      btn.disabled = true;
+      btn.textContent = "만드는 중…";
+      try {
+        const res = await fetch("/api/generate_pptx", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ worship_order: flat, hymn_txt_content: content || "" }) });
+        if (!res.ok) { const err = await res.json().catch(() => ({})); throw new Error(err.detail || res.statusText); }
+        const blob = await res.blob();
+        const name = (res.headers.get("content-disposition") || "").match(/filename="?([^";]+)"?/)?.[1] || "예배.pptx";
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = name;
+        a.click();
+        URL.revokeObjectURL(a.href);
+        showToast("PPT 파일이 다운로드되었습니다.");
+      } catch (e) { showToast(e.message || "생성에 실패했습니다. 잠시 후 다시 시도해 주세요.", "err"); }
+      finally { btn.disabled = false; btn.textContent = "PPT 만들기"; }
+    });
+
+    document.getElementById("tabCaption").addEventListener("click", () => {
+      document.querySelectorAll(".tabs button").forEach(b => b.classList.remove("active"));
+      document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+      document.getElementById("tabCaption").classList.add("active");
+      document.getElementById("panelCaption").classList.add("active");
+    });
+    document.getElementById("tabHymn").addEventListener("click", () => {
+      document.querySelectorAll(".tabs button").forEach(b => b.classList.remove("active"));
+      document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+      document.getElementById("tabHymn").classList.add("active");
+      document.getElementById("panelHymn").classList.add("active");
     });
 
     loadOrder();
     loadSermon();
     renderOrder();
-    renderSermon();
-    loadHymnFromApi();
+    updateCtaSummary();
+    loadHymnFromApi().then(r => { if (r) parseHymnBlocks(document.getElementById("hymnContent").value || ""); });
   </script>
 </body>
 </html>

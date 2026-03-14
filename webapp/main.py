@@ -21,9 +21,11 @@ if str(_ROOT) not in sys.path:
 try:
     from lib.hymn_format import user_to_hymn_txt
     from lib.sermon_prompt import SERMON_CODE_SYSTEM
+    from lib.bible_verse import get_bible_verse_text
 except ImportError:
     user_to_hymn_txt = None
     SERMON_CODE_SYSTEM = ""
+    get_bible_verse_text = None
 
 app = FastAPI(title="늘푸른교회 자막 웹앱", version="1.0.0")
 
@@ -168,6 +170,15 @@ async def api_generate_pptx(body: GeneratePptxBody):
         raise HTTPException(422, str(e)) from e
     except Exception as e:
         raise HTTPException(500, f"PPTX 생성 중 오류: {e}") from e
+
+
+@app.get("/api/get_bible_verse")
+def api_get_bible_verse(book: str = "", start: str = "", end: str | None = None):
+    """성경 구절 텍스트 조회 (상세 팝업용)."""
+    if not get_bible_verse_text or not book or not start:
+        raise HTTPException(400, "book, start 필요")
+    text = get_bible_verse_text(book, start, end or start)
+    return {"text": text, "book": book, "start": start, "end": end or start}
 
 
 @app.get("/api/health")
