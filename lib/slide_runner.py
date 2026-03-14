@@ -14,7 +14,10 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
-os.chdir(ROOT)
+try:
+    os.chdir(ROOT)
+except OSError:
+    pass  # 서버리스 등에서 chdir 불가 시 무시
 
 from pptx import Presentation
 from pptx.util import Cm
