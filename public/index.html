@@ -137,6 +137,12 @@
     .hymn-item-list li .hymn-item-actions button { padding: 6px 10px; font-size: 0.85rem; }
     .hymn-empty { display: none; padding: 24px; text-align: center; color: var(--muted); font-size: 0.9rem; background: var(--bg); border-radius: var(--radius-sm); margin-top: 12px; }
     .hymn-item-list:empty + .hymn-empty { display: block; }
+    .hymn-dropdown-wrap { position: relative; }
+    .hymn-dropdown-list { display: none; position: absolute; left: 0; right: 0; top: 100%; margin-top: 4px; max-height: 280px; overflow-y: auto; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-sm); box-shadow: var(--shadow-md); z-index: 20; }
+    .hymn-dropdown-list.open { display: block; }
+    .hymn-dropdown-list .item { padding: 10px 14px; cursor: pointer; font-size: 0.9rem; border-bottom: 1px solid var(--border); }
+    .hymn-dropdown-list .item:last-child { border-bottom: none; }
+    .hymn-dropdown-list .item:hover { background: var(--accent-light); }
   </style>
 </head>
 <body>
@@ -202,7 +208,7 @@
             <button type="button" class="btn outline sm" id="btnSermonWord">Word 파일 분석 → 자막에 추가</button>
             <button type="button" class="btn outline sm" id="btnSermonManual">수동 추가 (성경 권 + 장:절)</button>
           </div>
-          <div id="sermonWordArea" style="display:none; margin-top:12px; padding:12px; background:#fff; border-radius:8px; border:1px solid var(--border)">
+          <div id="sermonWordArea" style="margin-top:12px; padding:12px; background:#fff; border-radius:8px; border:1px solid var(--border)">
             <input type="file" id="docxFile" accept=".docx" />
             <button type="button" class="btn sm" id="btnParse">원고 분석</button>
             <button type="button" class="btn sm" id="btnAiCode">말씀 추출 후 자막에 추가</button>
@@ -241,13 +247,16 @@
     <section id="panelHymn" class="panel">
       <div class="section">
         <h2 class="section-title">찬송 목록</h2>
-        <p class="section-desc">찬송은 제목 하나가 항목 하나입니다. 항목을 클릭해 편집하거나 새로 추가하세요.</p>
-        <div class="btn-group">
+        <p class="section-desc">찬송 제목을 검색해 선택하면 가사를 볼 수 있습니다.</p>
+        <div class="hymn-dropdown-wrap">
+          <label>찬송 검색 · 선택</label>
+          <input type="text" id="hymnSearchInput" placeholder="제목 입력 시 목록에서 검색..." autocomplete="off" />
+          <div id="hymnDropdownList" class="hymn-dropdown-list"></div>
+        </div>
+        <div class="btn-group" style="margin-top:12px">
           <button type="button" class="btn outline sm" id="btnHymnListRefresh">목록 새로고침</button>
           <button type="button" class="btn sm" id="btnHymnNew">새 찬송 추가</button>
         </div>
-        <ul id="hymnList" class="hymn-item-list"></ul>
-        <div class="hymn-empty" id="hymnListEmpty">저장된 찬송이 없습니다. 새 찬송을 추가해 보세요.</div>
       </div>
       <div class="section hymn-editor-section" id="hymnEditorSection">
         <h2 class="section-title" id="hymnEditorTitle">찬송 편집</h2>
@@ -264,10 +273,23 @@
     </section>
   </div>
 
-  <!-- 찬송 선택 모달 (자막에 넣기) -->
+  <!-- 찬송 가사 보기 팝업 -->
+  <div class="overlay" id="hymnLyricsModal">
+    <div class="modal">
+      <h3 id="hymnLyricsTitle">가사</h3>
+      <div class="modal-body" id="hymnLyricsBody"></div>
+      <div class="modal-actions">
+        <button type="button" class="btn outline sm" id="hymnLyricsEdit">편집</button>
+        <button type="button" class="btn outline sm danger" id="hymnLyricsDelete">삭제</button>
+        <button type="button" class="btn outline sm" id="hymnLyricsClose">닫기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 찬송 선택/변경 모달 (추가 시 + 순서에서 찬송 클릭 시) -->
   <div class="overlay" id="hymnPickModal">
     <div class="modal">
-      <h3>찬송 선택</h3>
+      <h3 id="hymnPickModalTitle">찬송 선택</h3>
       <input type="text" class="modal-search" id="hymnPickSearch" placeholder="제목 검색..." autocomplete="off" />
       <div class="modal-list" id="hymnPickList"></div>
       <div class="modal-actions"><button type="button" class="btn outline sm" id="hymnPickClose">취소</button></div>
@@ -325,6 +347,7 @@
     let pendingSermonItems = [];
     let hymnEditTitle = null;
     let deleteTargetIndex = null;
+    let hymnPickEditIndex = -1;
 
     function showToast(msg, type) {
       const el = document.getElementById("toast");
@@ -416,7 +439,10 @@
       ul.querySelectorAll("li").forEach(li => {
         li.addEventListener("click", e => {
           if (e.target.closest(".row-actions")) return;
-          showDetail(parseInt(li.dataset.i, 10));
+          const i = parseInt(li.dataset.i, 10);
+          const type = li.dataset.type || "";
+          if (type === "hymn") openHymnPickForEdit(i);
+          else showDetail(i);
         });
       });
       ul.querySelectorAll(".remove").forEach(btn => {
@@ -580,18 +606,39 @@
     const hymnPickSearch = document.getElementById("hymnPickSearch");
     function fillHymnPickList() {
       const q = hymnPickSearch.value.trim().toLowerCase();
-      const list = hymnTitles.filter(t => t.toLowerCase().includes(q)).slice(0, 50);
-      hymnPickList.innerHTML = list.length ? list.map(t => `<div class="item" data-title="${t.replace(/"/g, "&quot;")}">${t}</div>`).join("") : "<p style='padding:12px;color:var(--muted)'>" + (hymnTitles.length ? "검색 결과 없음" : "찬송가 관리 탭에서 목록을 불러오세요.") + "</p>";
+      const list = q ? hymnTitles.filter(t => t.toLowerCase().includes(q)) : hymnTitles;
+      hymnPickList.innerHTML = list.length ? list.map(t => `<div class="item" data-title="${t.replace(/"/g, "&quot;")}">${t}</div>`).join("") : "<p style='padding:12px;color:var(--muted)'>" + (hymnTitles.length ? "검색 결과 없음" : "목록 새로고침을 눌러 주세요.") + "</p>";
       hymnPickList.querySelectorAll(".item[data-title]").forEach(el => {
         el.addEventListener("click", () => {
-          worshipOrder.push({ type: "hymn", title: el.dataset.title });
-          saveOrder();
-          hymnPickModal.classList.remove("open");
-          showToast("찬송을 순서에 추가했습니다.");
+          const title = el.dataset.title;
+          if (hymnPickEditIndex >= 0) {
+            worshipOrder[hymnPickEditIndex].title = title;
+            saveOrder();
+            hymnPickEditIndex = -1;
+            hymnPickModal.classList.remove("open");
+            document.getElementById("hymnPickModalTitle").textContent = "찬송 선택";
+            showToast("찬송을 변경했습니다.");
+          } else {
+            worshipOrder.push({ type: "hymn", title });
+            saveOrder();
+            hymnPickModal.classList.remove("open");
+            showToast("찬송을 순서에 추가했습니다.");
+          }
         });
       });
     }
+    async function openHymnPickForEdit(orderIndex) {
+      hymnPickEditIndex = orderIndex;
+      document.getElementById("hymnPickModalTitle").textContent = "찬송 변경";
+      hymnPickSearch.value = "";
+      if (hymnTitles.length === 0) await loadHymnList();
+      fillHymnPickList();
+      hymnPickModal.classList.add("open");
+      hymnPickSearch.focus();
+    }
     document.getElementById("btnOpenHymnPick").addEventListener("click", async () => {
+      hymnPickEditIndex = -1;
+      document.getElementById("hymnPickModalTitle").textContent = "찬송 선택";
       hymnPickSearch.value = "";
       if (hymnTitles.length === 0) await loadHymnList();
       fillHymnPickList();
@@ -599,15 +646,26 @@
       hymnPickSearch.focus();
     });
     hymnPickSearch.addEventListener("input", fillHymnPickList);
-    document.getElementById("hymnPickClose").addEventListener("click", () => hymnPickModal.classList.remove("open"));
+    document.getElementById("hymnPickClose").addEventListener("click", () => {
+      hymnPickEditIndex = -1;
+      document.getElementById("hymnPickModalTitle").textContent = "찬송 선택";
+      hymnPickModal.classList.remove("open");
+    });
+    document.getElementById("hymnPickModal").addEventListener("click", e => {
+      if (e.target.id === "hymnPickModal") {
+        hymnPickEditIndex = -1;
+        document.getElementById("hymnPickModalTitle").textContent = "찬송 선택";
+        hymnPickModal.classList.remove("open");
+      }
+    });
 
     document.getElementById("btnSermonWord").addEventListener("click", () => {
       document.getElementById("sermonManualArea").style.display = "none";
-      document.getElementById("sermonWordArea").style.display = document.getElementById("sermonWordArea").style.display ? "none" : "block";
+      document.getElementById("sermonWordArea").style.display = "block";
     });
     document.getElementById("btnSermonManual").addEventListener("click", () => {
       document.getElementById("sermonWordArea").style.display = "none";
-      document.getElementById("sermonManualArea").style.display = document.getElementById("sermonManualArea").style.display ? "none" : "block";
+      document.getElementById("sermonManualArea").style.display = "block";
     });
     document.getElementById("btnParse").addEventListener("click", async () => {
       const file = document.getElementById("docxFile").files[0];
@@ -633,16 +691,26 @@
         const lines = code.split("\n").filter(l => l.trim());
         pendingSermonItems = [];
         lines.forEach(line => {
-          const mBible = line.match(/add_bible_slide\s*\([^,]+,[^,]+,\s*["']([^"']+)["'],\s*["']([^"']+)["'](?:,\s*["']([^"']*)["'])?/);
-          const mSub = line.match(/add_subtitle_slide\s*\([^,]+,\s*input_text\s*=\s*["']([^"']*)["']/);
-          if (mBible) pendingSermonItems.push({ type: "bible", book: mBible[1], start: mBible[2], end: (mBible[3] || "").trim() });
-          else if (mSub) pendingSermonItems.push({ type: "subtitle", text: mSub[1] });
+          const mBible = line.match(/add_bible_slide\s*\([^)]*["']([^"']+)["']\s*,\s*["']([^"']+)["'](?:\s*,\s*["']([^"']*)["'])?\s*\)/);
+          const mSub = line.match(/input_text\s*=\s*["']([^"']*)["']/);
+          if (mBible) pendingSermonItems.push({ type: "bible", book: mBible[1].trim(), start: mBible[2].trim(), end: (mBible[3] || "").trim() || mBible[2].trim() });
+          else if (mSub) pendingSermonItems.push({ type: "subtitle", text: (mSub[1] || "").replace(/\\n/g, "\n") });
         });
-        document.getElementById("confirmAddModal").classList.add("open");
+        if (pendingSermonItems.length === 0) showToast("추출된 말씀 항목이 없습니다. 원고에 빨간색 본문이 있는지 확인하세요.", "err");
+        else document.getElementById("confirmAddModal").classList.add("open");
       } catch (e) { showToast(e.message || "실패", "err"); }
     });
+    function ensureSermonBlock() {
+      if (!worshipOrder.some(item => item.type === "sermon_block")) {
+        const idx = worshipOrder.findIndex(item => item.type === "card" && (item.text || "").includes("대표기도"));
+        const insertAt = idx >= 0 ? idx + 1 : worshipOrder.length;
+        worshipOrder.splice(insertAt, 0, { type: "sermon_block" });
+        saveOrder();
+      }
+    }
     document.getElementById("confirmAddOk").addEventListener("click", () => {
       sermonItems.push(...pendingSermonItems);
+      ensureSermonBlock();
       saveSermon();
       document.getElementById("confirmAddModal").classList.remove("open");
       showToast("말씀 " + pendingSermonItems.length + "개 추가됨");
@@ -656,6 +724,7 @@
       const start = document.getElementById("bibleStart").value.trim();
       const end = document.getElementById("bibleEnd").value.trim();
       if (!book || !start) { showToast("성경 권과 장:절을 입력하세요.", "err"); return; }
+      ensureSermonBlock();
       sermonItems.push({ type: "bible", book, start, end: end || start });
       saveSermon();
       showToast("본문 추가됨");
@@ -663,11 +732,13 @@
     document.getElementById("btnAddSubtitle").addEventListener("click", () => {
       const text = document.getElementById("subtitleText").value.trim();
       if (!text) { showToast("부제 텍스트를 입력하세요.", "err"); return; }
+      ensureSermonBlock();
       sermonItems.push({ type: "subtitle", text });
       saveSermon();
       showToast("부제 추가됨");
     });
 
+    let hymnLyricsCurrentTitle = null;
     async function loadHymnList() {
       try {
         const res = await fetch("/api/hymns/list");
@@ -676,17 +747,36 @@
       } catch (_) {
         hymnTitles = [];
       }
-      const ul = document.getElementById("hymnList");
-      ul.innerHTML = hymnTitles.map((t) => `<li data-title="${t.replace(/"/g, "&quot;")}"><span class="hymn-item-title">${t}</span><span class="hymn-item-actions"><button type="button" class="btn sm outline btn-hymn-edit">편집</button><button type="button" class="btn sm outline danger btn-hymn-delete">삭제</button></span></li>`).join("");
-      ul.querySelectorAll("li").forEach((li) => {
-        const title = li.dataset.title;
-        li.addEventListener("click", (e) => { if (!e.target.closest(".hymn-item-actions")) openHymnEditor(title); });
-        li.querySelector(".btn-hymn-edit")?.addEventListener("click", (e) => { e.stopPropagation(); openHymnEditor(title); });
-        li.querySelector(".btn-hymn-delete")?.addEventListener("click", (e) => { e.stopPropagation(); confirmHymnDelete(title); });
-      });
-      document.getElementById("hymnListEmpty").style.display = hymnTitles.length === 0 ? "block" : "none";
-      ul.style.display = hymnTitles.length === 0 ? "none" : "block";
+      renderHymnDropdown();
       return hymnTitles;
+    }
+    function renderHymnDropdown() {
+      const listEl = document.getElementById("hymnDropdownList");
+      const q = (document.getElementById("hymnSearchInput").value || "").trim().toLowerCase();
+      const filtered = q ? hymnTitles.filter(t => t.toLowerCase().includes(q)) : hymnTitles;
+      listEl.innerHTML = filtered.length ? filtered.map(t => `<div class="item" data-title="${t.replace(/"/g, "&quot;")}">${t}</div>`).join("") : "<div class='item' style='color:var(--muted);cursor:default'>" + (hymnTitles.length ? "검색 결과 없음" : "목록 새로고침을 눌러 주세요.") + "</div>";
+      listEl.classList.toggle("open", filtered.length > 0 && document.getElementById("hymnSearchInput") === document.activeElement);
+      listEl.querySelectorAll(".item[data-title]").forEach(el => {
+        el.addEventListener("click", () => {
+          const title = el.dataset.title;
+          document.getElementById("hymnSearchInput").value = title;
+          listEl.classList.remove("open");
+          showHymnLyricsPopup(title);
+        });
+      });
+    }
+    async function showHymnLyricsPopup(title) {
+      hymnLyricsCurrentTitle = title;
+      document.getElementById("hymnLyricsTitle").textContent = title;
+      document.getElementById("hymnLyricsBody").textContent = "불러오는 중…";
+      document.getElementById("hymnLyricsModal").classList.add("open");
+      try {
+        const r = await fetch("/api/hymns/one?title=" + encodeURIComponent(title));
+        const d = await r.json();
+        document.getElementById("hymnLyricsBody").textContent = (d.content != null ? d.content : "") || "(가사 없음)";
+      } catch (_) {
+        document.getElementById("hymnLyricsBody").textContent = "가사를 불러올 수 없습니다.";
+      }
     }
     function openHymnEditor(title) {
       hymnEditTitle = title;
@@ -716,6 +806,14 @@
     }
     document.getElementById("btnHymnListRefresh").addEventListener("click", async () => { await loadHymnList(); showToast("목록을 새로고침했습니다."); });
     document.getElementById("btnHymnNew").addEventListener("click", () => { hymnEditTitle = null; openHymnEditor(null); });
+    const hymnSearchInput = document.getElementById("hymnSearchInput");
+    hymnSearchInput.addEventListener("input", renderHymnDropdown);
+    hymnSearchInput.addEventListener("focus", () => { if (hymnTitles.length) document.getElementById("hymnDropdownList").classList.add("open"); renderHymnDropdown(); });
+    hymnSearchInput.addEventListener("blur", () => { setTimeout(() => document.getElementById("hymnDropdownList").classList.remove("open"), 180); });
+    document.getElementById("hymnLyricsEdit").addEventListener("click", () => { if (hymnLyricsCurrentTitle) { document.getElementById("hymnLyricsModal").classList.remove("open"); openHymnEditor(hymnLyricsCurrentTitle); } });
+    document.getElementById("hymnLyricsDelete").addEventListener("click", () => { if (hymnLyricsCurrentTitle) { document.getElementById("hymnLyricsModal").classList.remove("open"); confirmHymnDelete(hymnLyricsCurrentTitle); } });
+    document.getElementById("hymnLyricsClose").addEventListener("click", () => document.getElementById("hymnLyricsModal").classList.remove("open"));
+    document.getElementById("hymnLyricsModal").addEventListener("click", e => { if (e.target.id === "hymnLyricsModal") e.target.classList.remove("open"); });
     document.getElementById("btnHymnSave").addEventListener("click", async () => {
       const title = document.getElementById("hymnEditTitle").value.trim();
       const content = document.getElementById("hymnEditContent").value.trim();

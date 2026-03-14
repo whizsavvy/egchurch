@@ -3,6 +3,10 @@ import re  # 정규 표현식 모듈 추가
 import unicodedata
 import chardet
 import datetime
+from pptx.util import Cm, Pt
+from pptx.enum.text import PP_ALIGN, MSO_AUTO_SIZE, MSO_ANCHOR
+from pptx.dml.color import RGBColor
+from pptx.enum.shapes import MSO_SHAPE
 
 
 def normalized_str(str):
@@ -342,11 +346,6 @@ def add_bible_slide(prs, directory, title, start_verse, end_verse='', box_color 
     slide = prs.slides.add_slide(prs.slide_layouts[6])
     slide.background.fill.solid()
     slide.background.fill.fore_color.rgb = RGBColor(0, 255, 0)
-
-from pptx.util import Cm, Pt
-from pptx.enum.text import PP_ALIGN, MSO_AUTO_SIZE
-from pptx.enum.text import MSO_ANCHOR
-from pptx.dml.color import RGBColor
 
 
 def add_choir_slides_from_file(prs, title, box_color="203864"):
