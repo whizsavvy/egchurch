@@ -1,4 +1,4 @@
-# GET /api/hymns/list — 찬송 목록 (data/hymns/*.txt)
+# GET /api/hymns/list — 찬송 목록 (data/hymns/*.txt, 비어 있으면 기존 hymn.txt)
 import json
 import os
 import sys
@@ -11,6 +11,7 @@ if ROOT not in sys.path:
     sys.path.insert(0, ROOT)
 
 from lib.hymn_files import HYMN_DIR, GITHUB_REPO, filename_to_title
+from lib.hymn_legacy import legacy_titles
 
 
 class handler(BaseHTTPRequestHandler):
@@ -23,18 +24,18 @@ class handler(BaseHTTPRequestHandler):
             if token:
                 headers["Authorization"] = f"Bearer {token}"
             req = urllib.request.Request(url, headers=headers)
+            titles = []
             try:
                 with urllib.request.urlopen(req, timeout=10) as r:
                     items = json.loads(r.read().decode("utf-8"))
+                if isinstance(items, list):
+                    titles = [filename_to_title(f.get("name", "")) for f in items if f.get("name", "").endswith(".txt")]
             except urllib.error.HTTPError as e:
-                if e.code == 404:
-                    items = []
-                else:
+                if e.code != 404:
                     self._send(500, {"detail": "목록 조회 실패"})
                     return
-            if not isinstance(items, list):
-                items = []
-            titles = [filename_to_title(f.get("name", "")) for f in items if f.get("name", "").endswith(".txt")]
+            if not titles:
+                titles = legacy_titles()
             titles.sort(key=lambda x: x)
             self._send(200, {"items": titles})
         except Exception as e:

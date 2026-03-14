@@ -1,4 +1,4 @@
-# GET /api/hymns/one?title=제목 — 찬송 한 곡 내용
+# GET /api/hymns/one?title=제목 — 찬송 한 곡 내용 (없으면 기존 hymn.txt에서)
 import json
 import os
 import sys
@@ -11,6 +11,7 @@ if ROOT not in sys.path:
     sys.path.insert(0, ROOT)
 
 from lib.hymn_files import HYMN_DIR, GITHUB_REPO, sanitize_filename
+from lib.hymn_legacy import legacy_one
 
 
 class handler(BaseHTTPRequestHandler):
@@ -33,12 +34,13 @@ class handler(BaseHTTPRequestHandler):
             try:
                 with urllib.request.urlopen(req, timeout=10) as r:
                     content = r.read().decode("utf-8")
-            except urllib.error.HTTPError as e:
-                if e.code == 404:
-                    self._send(200, {"title": title, "content": ""})
-                    return
-                self._send(e.code, {"detail": "조회 실패"})
+                self._send(200, {"title": title, "content": content})
                 return
+            except urllib.error.HTTPError as e:
+                if e.code != 404:
+                    self._send(e.code, {"detail": "조회 실패"})
+                    return
+            content = legacy_one(title)
             self._send(200, {"title": title, "content": content})
         except Exception as e:
             self._send(500, {"detail": str(e)})

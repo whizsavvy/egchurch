@@ -21,12 +21,16 @@ if str(_ROOT) not in sys.path:
 try:
     from lib.hymn_format import user_to_hymn_txt
     from lib.hymn_files import sanitize_filename, filename_to_title
+    from lib.hymn_legacy import legacy_titles, legacy_one, legacy_merged
     from lib.sermon_prompt import SERMON_CODE_SYSTEM
     from lib.bible_verse import get_bible_verse_text
 except ImportError:
     user_to_hymn_txt = None
     sanitize_filename = None
     filename_to_title = None
+    legacy_titles = None
+    legacy_one = None
+    legacy_merged = None
     SERMON_CODE_SYSTEM = ""
     get_bible_verse_text = None
 
@@ -184,39 +188,44 @@ def _hymn_dir():
 
 @app.get("/api/hymns/list")
 def api_hymns_list():
-    """찬송 목록 (로컬: data/hymns/*.txt)."""
-    if not HYMN_DIR_LOCAL.exists():
-        return {"items": []}
+    """찬송 목록 (로컬: data/hymns/*.txt, 비어 있으면 기존 hymn.txt)."""
     items = []
-    for f in sorted(_hymn_dir().iterdir()):
-        if f.suffix.lower() == ".txt" and f.is_file():
-            items.append(filename_to_title(f.name) if filename_to_title else f.stem)
+    if HYMN_DIR_LOCAL.exists():
+        for f in sorted(_hymn_dir().iterdir()):
+            if f.suffix.lower() == ".txt" and f.is_file():
+                items.append(filename_to_title(f.name) if filename_to_title else f.stem)
+    if not items and legacy_titles:
+        items = legacy_titles()
+    items.sort(key=lambda x: x)
     return {"items": items}
 
 
 @app.get("/api/hymns/one")
 def api_hymns_one(title: str = ""):
-    """찬송 한 곡 내용."""
+    """찬송 한 곡 내용 (없으면 기존 hymn.txt에서)."""
     title = (title or "").strip()
     if not title or not sanitize_filename:
         raise HTTPException(400, "title 필요")
     path = _hymn_dir() / (sanitize_filename(title) + ".txt")
-    if not path.is_file():
-        return {"title": title, "content": ""}
-    return {"title": title, "content": path.read_text(encoding="utf-8")}
+    if path.is_file():
+        return {"title": title, "content": path.read_text(encoding="utf-8")}
+    if legacy_one:
+        return {"title": title, "content": legacy_one(title)}
+    return {"title": title, "content": ""}
 
 
 @app.get("/api/hymns/merged")
 def api_hymns_merged():
-    """PPT용 병합 문자열 (제목\\n------\\n가사)."""
-    if not HYMN_DIR_LOCAL.exists():
-        return ""
+    """PPT용 병합 문자열 (비어 있으면 기존 hymn.txt)."""
     parts = []
-    for f in sorted(_hymn_dir().iterdir()):
-        if f.suffix.lower() == ".txt" and f.is_file():
-            title = filename_to_title(f.name) if filename_to_title else f.stem
-            content = f.read_text(encoding="utf-8").strip()
-            parts.append(title + "\n------\n" + content)
+    if HYMN_DIR_LOCAL.exists():
+        for f in sorted(_hymn_dir().iterdir()):
+            if f.suffix.lower() == ".txt" and f.is_file():
+                title = filename_to_title(f.name) if filename_to_title else f.stem
+                content = f.read_text(encoding="utf-8").strip()
+                parts.append(title + "\n------\n" + content)
+    if not parts and legacy_merged:
+        return PlainTextResponse(legacy_merged(), media_type="text/plain; charset=utf-8")
     return PlainTextResponse("\n\n".join(parts), media_type="text/plain; charset=utf-8")
 
 
