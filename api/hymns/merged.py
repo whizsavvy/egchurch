@@ -4,6 +4,7 @@ import os
 import sys
 import urllib.request
 import urllib.error
+from urllib.parse import quote
 from http.server import BaseHTTPRequestHandler
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -46,8 +47,9 @@ class handler(BaseHTTPRequestHandler):
                     name = f.get("name", "")
                     title = filename_to_title(name)
                     try:
+                        path_encoded = quote(f"{HYMN_DIR}/{name}", safe="/")
                         rreq = urllib.request.Request(
-                            f"https://api.github.com/repos/{repo}/contents/{HYMN_DIR}/{name}",
+                            f"https://api.github.com/repos/{repo}/contents/{path_encoded}",
                             headers=raw_headers,
                         )
                         with urllib.request.urlopen(rreq, timeout=10) as r:

@@ -4,6 +4,8 @@ import json
 import os
 import sys
 import urllib.request
+import urllib.error
+from urllib.parse import quote
 from http.server import BaseHTTPRequestHandler
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -37,7 +39,8 @@ class handler(BaseHTTPRequestHandler):
             repo = os.environ.get("GITHUB_REPO") or GITHUB_REPO
             filename = sanitize_filename(title) + ".txt"
             path = f"{HYMN_DIR}/{filename}"
-            api_url = f"https://api.github.com/repos/{repo}/contents/{path}"
+            path_encoded = quote(path, safe="/")
+            api_url = f"https://api.github.com/repos/{repo}/contents/{path_encoded}"
             headers = {
                 "Authorization": f"Bearer {token}",
                 "Accept": "application/vnd.github+json",
