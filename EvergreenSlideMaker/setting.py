@@ -68,7 +68,6 @@ def load_hymn(filepath, target_title):
         raw = f.read()
         result = chardet.detect(raw)
         encoding = result['encoding']
-        print(f"🔍 감지된 인코딩: {encoding}")
     
     # 감지된 인코딩으로 파일 읽기
     with open(filepath, 'r', encoding=encoding) as file:

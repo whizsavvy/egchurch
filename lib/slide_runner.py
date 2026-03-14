@@ -157,19 +157,21 @@ def run_worship_order(
     - bible: book, start, end (선택)
     - subtitle: text
     """
-    temp_evergreen = None
-    if hymn_txt_content and hymn_txt_content.strip():
-        temp_evergreen = Path(tempfile.mkdtemp())
-        try:
-            shutil.copytree(ROOT / "EvergreenSlideMaker", temp_evergreen / "EvergreenSlideMaker")
+    src_evergreen = ROOT / "EvergreenSlideMaker"
+    if not src_evergreen.is_dir():
+        raise FileNotFoundError(f"EvergreenSlideMaker 폴더를 찾을 수 없습니다: {ROOT}")
+    temp_evergreen = Path(tempfile.mkdtemp())
+    try:
+        shutil.copytree(src_evergreen, temp_evergreen / "EvergreenSlideMaker")
+        _setting.folder_path = str(temp_evergreen / "EvergreenSlideMaker")
+        if hymn_txt_content and hymn_txt_content.strip():
             hymn_file = temp_evergreen / "EvergreenSlideMaker" / "Hymn" / "hymn.txt"
             hymn_file.parent.mkdir(parents=True, exist_ok=True)
             hymn_file.write_text(hymn_txt_content.strip(), encoding="utf-8")
-            _setting.folder_path = str(temp_evergreen / "EvergreenSlideMaker")
-        except Exception:
-            if temp_evergreen and temp_evergreen.exists():
-                shutil.rmtree(temp_evergreen, ignore_errors=True)
-            raise
+    except Exception as e:
+        if temp_evergreen.exists():
+            shutil.rmtree(temp_evergreen, ignore_errors=True)
+        raise RuntimeError(f"EvergreenSlideMaker 복사 실패: {e}") from e
 
     try:
         prs = Presentation()
@@ -215,7 +217,12 @@ def run_worship_order(
 
         prs.save(out_path)
         return out_path
+    except Exception as e:
+        if temp_evergreen.exists():
+            shutil.rmtree(temp_evergreen, ignore_errors=True)
+        _setting.folder_path = str(ROOT / "EvergreenSlideMaker")
+        raise RuntimeError(f"PPT 생성 중 오류: {e}") from e
     finally:
-        if temp_evergreen and temp_evergreen.exists():
+        if temp_evergreen.exists():
             shutil.rmtree(temp_evergreen, ignore_errors=True)
         _setting.folder_path = str(ROOT / "EvergreenSlideMaker")

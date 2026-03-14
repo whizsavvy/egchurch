@@ -4,5 +4,8 @@
   "outputDirectory": "public",
   "rewrites": [
     { "source": "/((?!api/).*)", "destination": "/index.html" }
-  ]
+  ],
+  "functions": {
+    "api/generate_pptx.py": { "maxDuration": 60 }
+  }
 }

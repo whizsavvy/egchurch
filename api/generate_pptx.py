@@ -69,7 +69,8 @@ class handler(BaseHTTPRequestHandler):
         except RuntimeError as e:
             self._json_response(422, {"detail": str(e)})
         except Exception as e:
-            self._json_response(500, {"detail": f"PPTX 생성 중 오류: {e}"})
+            msg = str(e) or type(e).__name__
+            self._json_response(500, {"detail": f"PPTX 생성 중 오류: {msg}"})
 
     def _json_response(self, status, data):
         self.send_response(status)
