@@ -68,10 +68,25 @@
     .hint { color: var(--muted); font-size: 0.85rem; margin-top: 4px; }
     .btn-group { margin-top: 8px; }
     .btn-group button { margin-right: 8px; }
+    .tabs { display: flex; gap: 0; margin-bottom: 20px; border-bottom: 1px solid var(--border); }
+    .tabs button {
+      background: transparent; color: var(--muted); padding: 12px 20px; border: none; border-bottom: 2px solid transparent;
+      cursor: pointer; font-size: 1rem;
+    }
+    .tabs button:hover { color: var(--text); }
+    .tabs button.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
   </style>
 </head>
 <body>
   <h1>늘푸른교회 자막 만들기</h1>
+  <nav class="tabs" role="tablist">
+    <button type="button" role="tab" id="tabCaption" aria-selected="true" class="active">자막 만들기</button>
+    <button type="button" role="tab" id="tabHymnList" aria-selected="false">찬송가 목록</button>
+  </nav>
+
+  <section id="panelCaption" role="tabpanel" class="tab-panel active" aria-labelledby="tabCaption">
   <p class="muted">(1) 원고 첨부 → (2) 설교 코드 자동 생성 → (3) 찬송/카드 입력 → (4) 파일 추출</p>
 
   <div class="step">
@@ -90,19 +105,25 @@
   </div>
 
   <div class="step">
-    <h2><span class="step-num">2</span> 찬송가(hymn) 추가</h2>
+    <h2><span class="step-num">2</span> 찬송가(hymn) &amp; 예배 순서</h2>
     <div class="card">
-      <label>찬송가 내용 (한 곡당 아래 형식으로, 곡 사이는 빈 줄로 구분)</label>
-      <textarea id="hymnTxtContent" placeholder="제목&#10;------&#10;1절 가사...&#10;2절 가사...&#10;&#10;다음 곡 제목&#10;------&#10;가사..."></textarea>
-      <p class="hint">형식: 첫 줄에 제목, 다음 줄에 ------ , 그 다음 줄부터 가사. 여러 곡은 빈 줄로 구분.</p>
-      <label style="margin-top:12px;">이번 주 찬송 순서 (한 줄에 한 곡 제목, 위에서 넣은 제목과 같게)</label>
-      <textarea id="hymnList" style="min-height:60px" placeholder="임재&#10;좋으신 하나님&#10;내가 매일 기쁘게"></textarea>
-      <p class="hint">PPT에 넣을 찬송가 제목을 순서대로 적으세요. 비우면 찬송 슬라이드를 넣지 않습니다.</p>
+      <label style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+        <input type="checkbox" id="fullOrder" />
+        <span>예배 전체 순서 (exe.py create_presentation과 동일)</span>
+      </label>
+      <p class="hint">체크 시: 인도 이미지 → 찬송 5곡 → 성가대/통성/대표 → 설교 → 주님 다시 오실 때~ → 통성/광고 → 우리 오늘 눈물로 → 축도</p>
+      <label style="margin-top:12px;">인도 찬송 5곡 (한 줄에 한 곡, exe.py hymn_list 순서)</label>
+      <textarea id="hymnListIntro" style="min-height:70px" placeholder="임재&#10;좋으신 하나님&#10;내가 매일 기쁘게&#10;마음 속에 근심 있는 사람&#10;우리 주 하나님"></textarea>
+      <p class="hint">예배 전체 순서 사용 시 위 5곡이 설교 전에 들어갑니다. 아래 찬송가 내용에 위 제목들이 있어야 합니다.</p>
+      <label style="margin-top:12px;">찬송가 내용 (한 곡당: 제목 → ------ → 가사, 곡 사이 빈 줄)</label>
+      <textarea id="hymnTxtContent" placeholder="제목&#10;------&#10;1절 가사...&#10;&#10;다음 곡 제목&#10;------&#10;가사..."></textarea>
+      <label style="margin-top:12px;">이번 주 찬송 순서 (예배 전체 순서 미사용 시만, 한 줄에 한 곡)</label>
+      <textarea id="hymnList" style="min-height:50px" placeholder="임재&#10;좋으신 하나님"></textarea>
     </div>
   </div>
 
   <div class="step">
-    <h2><span class="step-num">3</span> 카드 슬라이드 (선택)</h2>
+    <h2><span class="step-num">3</span> 카드 슬라이드 (예배 전체 순서 미사용 시만)</h2>
     <div class="card">
       <label>카드 슬라이드 텍스트 (한 줄에 하나, 예: 통성기도, 대표기도, 광고, 축도)</label>
       <textarea id="cardSlides" style="min-height:80px" placeholder="통성기도&#10;대표기도&#10;광고&#10;축도"></textarea>
@@ -120,6 +141,23 @@
       <div id="genError" class="error"></div>
     </div>
   </div>
+  </section>
+
+  <section id="panelHymnList" role="tabpanel" class="tab-panel" aria-labelledby="tabHymnList" hidden>
+  <h2>찬송가 목록 관리</h2>
+  <p class="muted">보유 중인 찬송가를 직접 수정·업데이트하세요. 저장 시 GitHub 저장소에 반영되며, 자막 만들기 탭에서 불러옵니다.</p>
+  <div class="card">
+    <label>찬송가 전체 (한 곡당: 제목 → ------ → 가사, 곡 사이 빈 줄)</label>
+    <textarea id="hymnListContent" style="min-height:280px" placeholder="임재&#10;------&#10;1절 가사...&#10;&#10;좋으신 하나님&#10;------&#10;가사..."></textarea>
+    <label style="margin-top:16px;">인도 찬송 5곡 (exe.py hymn_list 순서, 한 줄에 한 곡)</label>
+    <textarea id="hymnListIntroStore" style="min-height:90px" placeholder="임재&#10;좋으신 하나님&#10;내가 매일 기쁘게&#10;마음 속에 근심 있는 사람&#10;우리 주 하나님"></textarea>
+    <div class="btn-group" style="margin-top:12px;">
+      <button type="button" id="btnHymnSave">GitHub에 저장</button>
+      <button type="button" id="btnHymnLoad">불러오기</button>
+    </div>
+    <p id="hymnListStatus" class="hint" style="margin-top:8px;"></p>
+  </div>
+  </section>
 
   <script>
     const docxFile = document.getElementById("docxFile");
@@ -129,12 +167,103 @@
     const codeGenArea = document.getElementById("codeGenArea");
     const btnGenCode = document.getElementById("btnGenCode");
     const codeGenError = document.getElementById("codeGenError");
+    const fullOrder = document.getElementById("fullOrder");
+    const hymnListIntro = document.getElementById("hymnListIntro");
     const hymnTxtContent = document.getElementById("hymnTxtContent");
     const hymnList = document.getElementById("hymnList");
     const cardSlides = document.getElementById("cardSlides");
     const codeInput = document.getElementById("codeInput");
     const btnGenerate = document.getElementById("btnGenerate");
     const genError = document.getElementById("genError");
+    const tabCaption = document.getElementById("tabCaption");
+    const tabHymnList = document.getElementById("tabHymnList");
+    const panelCaption = document.getElementById("panelCaption");
+    const panelHymnList = document.getElementById("panelHymnList");
+    const hymnListContent = document.getElementById("hymnListContent");
+    const hymnListIntroStore = document.getElementById("hymnListIntroStore");
+    const btnHymnSave = document.getElementById("btnHymnSave");
+    const btnHymnLoad = document.getElementById("btnHymnLoad");
+    const hymnListStatus = document.getElementById("hymnListStatus");
+
+    function setHymnStatus(msg, isError) {
+      hymnListStatus.textContent = msg;
+      hymnListStatus.style.color = isError ? "var(--red)" : "var(--accent)";
+    }
+    async function loadHymnFromApi() {
+      try {
+        const res = await fetch("/api/get_hymn_data");
+        const data = await res.json();
+        if (res.ok && data) {
+          hymnListContent.value = data.content || "";
+          hymnListIntroStore.value = data.intro || "";
+          setHymnStatus("GitHub에서 불러왔습니다.", false);
+          return;
+        }
+      } catch (e) {
+        setHymnStatus("불러오기 실패: " + (e.message || "네트워크 오류"), true);
+        return;
+      }
+      setHymnStatus("저장된 목록이 없습니다. 입력 후 저장하세요.", false);
+    }
+    async function saveHymnToApi() {
+      setHymnStatus("저장 중...", false);
+      try {
+        const res = await fetch("/api/save_hymn_data", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            content: hymnListContent.value.trim(),
+            intro: hymnListIntroStore.value.trim(),
+          }),
+        });
+        const data = await res.json();
+        if (res.ok && data && data.ok) {
+          setHymnStatus("GitHub에 저장되었습니다. 자막 만들기 탭에서 불러오기하면 반영됩니다.", false);
+          return;
+        }
+        setHymnStatus(data.detail || "저장 실패", true);
+      } catch (e) {
+        setHymnStatus("저장 실패: " + (e.message || "네트워크 오류"), true);
+      }
+    }
+    function applyHymnToCaptionPanel() {
+      hymnTxtContent.value = hymnListContent.value;
+      hymnListIntro.value = hymnListIntroStore.value;
+    }
+
+    tabCaption.addEventListener("click", function() {
+      tabCaption.classList.add("active");
+      tabCaption.setAttribute("aria-selected", "true");
+      tabHymnList.classList.remove("active");
+      tabHymnList.setAttribute("aria-selected", "false");
+      panelCaption.classList.add("active");
+      panelCaption.removeAttribute("hidden");
+      panelHymnList.classList.remove("active");
+      panelHymnList.setAttribute("hidden", "");
+      applyHymnToCaptionPanel();
+    });
+    tabHymnList.addEventListener("click", function() {
+      tabHymnList.classList.add("active");
+      tabHymnList.setAttribute("aria-selected", "true");
+      tabCaption.classList.remove("active");
+      tabCaption.setAttribute("aria-selected", "false");
+      panelHymnList.classList.add("active");
+      panelHymnList.removeAttribute("hidden");
+      panelCaption.classList.remove("active");
+      panelCaption.setAttribute("hidden", "");
+      loadHymnFromApi();
+    });
+
+    btnHymnSave.addEventListener("click", function() {
+      saveHymnToApi();
+    });
+    btnHymnLoad.addEventListener("click", function() {
+      loadHymnFromApi();
+    });
+
+    loadHymnFromApi().then(function() {
+      applyHymnToCaptionPanel();
+    });
 
     let lastParsed = null;
 
@@ -197,6 +326,9 @@
     btnGenerate.addEventListener("click", async () => {
       genError.textContent = "";
       const code = codeInput.value.trim();
+      const useFullOrder = fullOrder && fullOrder.checked;
+      const introHymns = hymnListIntro.value.trim().split("\n").map((s) => s.trim());
+      const hymnListIntrof = (introHymns.concat(["", "", "", "", ""])).slice(0, 5);
       const hymns = hymnList.value.trim().split("\n").map((s) => s.trim()).filter(Boolean);
       const cards = cardSlides.value.trim().split("\n").map((s) => s.trim()).filter(Boolean);
       const hymnTxt = hymnTxtContent.value.trim();
@@ -213,6 +345,8 @@
             hymn_list: hymns,
             card_slides: cards,
             hymn_txt_content: hymnTxt || undefined,
+            full_order: useFullOrder,
+            hymn_list_intro: useFullOrder ? hymnListIntrof : undefined,
           }),
         });
         if (!res.ok) {

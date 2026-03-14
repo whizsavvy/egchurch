@@ -36,7 +36,39 @@ add_bible_slide = _setting.add_bible_slide
 add_subtitle_slide = _setting.add_subtitle_slide
 add_hymn_slide = getattr(_setting, "add_hymn_slide", None)
 add_card_slide = getattr(_setting, "add_card_slide", None)
+add_image_slide = getattr(_setting, "add_image_slide", None)
+add_blank_slide = getattr(_setting, "add_blank_slide", None)
 directory = os.path.join(folder_path, "bible")
+
+
+def _add_intro_slides(prs, hymn_list_intro: list[str], pic_dic: str) -> None:
+    """exe.py create_presentation 앞부분: 이미지 → 찬송 5곡 → 카드(성가대/통성기도/대표기도)."""
+    if not add_image_slide or not add_blank_slide or not add_hymn_slide or not add_card_slide:
+        return
+    add_image_slide(prs, pic_dic + "2026.png", text="주일 1부 예배")
+    add_image_slide(prs, pic_dic + "2026.png", text="주일 2부 예배")
+    add_blank_slide(prs)
+    if hymn_list_intro and len(hymn_list_intro) > 0:
+        add_hymn_slide(prs, hymn_list_intro[0])
+    add_image_slide(prs, pic_dic + "2026_신앙고백1.JPG")
+    add_image_slide(prs, pic_dic + "2026_신앙고백2.JPG")
+    add_blank_slide(prs)
+    for i in range(1, min(5, len(hymn_list_intro))):
+        add_hymn_slide(prs, hymn_list_intro[i])
+    add_card_slide(prs, input_text="성가대 찬양")
+    add_card_slide(prs, input_text="통성기도", background_color="000000")
+    add_card_slide(prs, input_text="대표기도")
+
+
+def _add_outro_slides(prs) -> None:
+    """exe.py create_presentation 뒷부분: 찬송 → 통성기도/광고 → 찬송 → 축도."""
+    if not add_hymn_slide or not add_card_slide:
+        return
+    add_hymn_slide(prs, "주님 다시 오실 때 까지")
+    add_card_slide(prs, input_text="통성기도", background_color="000000")
+    add_card_slide(prs, input_text="광고")
+    add_hymn_slide(prs, "우리 오늘 눈물로")
+    add_card_slide(prs, input_text="축도")
 
 
 def run_sermon_code(
@@ -45,8 +77,14 @@ def run_sermon_code(
     hymn_list: list[str] | None = None,
     card_slides: list[str] | None = None,
     hymn_txt_content: str | None = None,
+    full_order: bool = False,
+    hymn_list_intro: list[str] | None = None,
 ) -> str:
-    # 찬송가 내용이 있으면 임시 폴더에 hymn.txt 쓰고 folder_path 교체
+    """
+    full_order=True 이면 exe.py create_presentation과 동일 순서:
+    인도/이미지 → 찬송 5곡 → 성가대/통성/대표 → 설교코드(exec) → 주님 다시~ → 통성/광고 → 우리 오늘~ → 축도.
+    hymn_list_intro: 인도용 찬송 5곡 [0]~[4] (full_order일 때만 사용).
+    """
     temp_evergreen = None
     if hymn_txt_content and hymn_txt_content.strip():
         temp_evergreen = Path(tempfile.mkdtemp())
@@ -69,6 +107,10 @@ def run_sermon_code(
         out_name = output_filename or f"{today}_늘푸른교회_.pptx"
         out_path = os.path.join(tempfile.gettempdir(), out_name)
         run_directory = os.path.join(_setting.folder_path, "bible")
+        pic_dic = _setting.folder_path + "/image/"
+
+        if full_order and hymn_list_intro:
+            _add_intro_slides(prs, hymn_list_intro, pic_dic)
 
         local_globals = {
             "prs": prs,
@@ -81,14 +123,17 @@ def run_sermon_code(
         except Exception as e:
             raise RuntimeError(f"슬라이드 코드 실행 중 오류: {e}") from e
 
-        if hymn_list and add_hymn_slide:
-            for title in hymn_list:
-                if title.strip():
-                    add_hymn_slide(prs, title.strip())
-        if card_slides and add_card_slide:
-            for text in card_slides:
-                if text.strip():
-                    add_card_slide(prs, input_text=text.strip())
+        if full_order:
+            _add_outro_slides(prs)
+        else:
+            if hymn_list and add_hymn_slide:
+                for title in hymn_list:
+                    if title.strip():
+                        add_hymn_slide(prs, title.strip())
+            if card_slides and add_card_slide:
+                for text in card_slides:
+                    if text.strip():
+                        add_card_slide(prs, input_text=text.strip())
 
         prs.save(out_path)
         return out_path

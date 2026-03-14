@@ -38,6 +38,8 @@ class GeneratePptxBody(BaseModel):
     hymn_list: list[str] | None = None
     card_slides: list[str] | None = None
     hymn_txt_content: str | None = None
+    full_order: bool = False
+    hymn_list_intro: list[str] | None = None
 
 
 class GenerateSermonCodeBody(BaseModel):
@@ -123,12 +125,18 @@ async def api_generate_pptx(body: GeneratePptxBody):
     card_slides = body.card_slides or []
     hymn_txt_raw = (body.hymn_txt_content or "").strip()
     hymn_txt_content = user_to_hymn_txt(hymn_txt_raw) if hymn_txt_raw and user_to_hymn_txt else None
+    full_order = body.full_order
+    hymn_list_intro = body.hymn_list_intro or []
+    if full_order and len(hymn_list_intro) < 5:
+        hymn_list_intro = (hymn_list_intro + ["", "", "", "", ""])[:5]
     try:
         out_path = run_sermon_code(
             code,
             hymn_list=hymn_list,
             card_slides=card_slides,
             hymn_txt_content=hymn_txt_content,
+            full_order=full_order,
+            hymn_list_intro=hymn_list_intro if full_order else None,
         )
         return FileResponse(
             out_path,

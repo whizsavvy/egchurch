@@ -17,11 +17,11 @@
 3. **Root Directory**는 비워 두고(프로젝트 루트 그대로), **Framework Preset**은 "Other"로 두고 배포.
 4. 배포가 끝나면 `https://프로젝트명.vercel.app` 형태의 URL로 앱에 접속할 수 있습니다.
 
-### 환경 변수 (필수)
+### 환경 변수
 
-- **OPENAI_API_KEY** — 설교 자막 코드 자동 생성에 사용합니다.  
-  Vercel 대시보드 → 프로젝트 → Settings → Environment Variables 에서 추가하세요.  
-  없으면 "설교 자막 코드 자동 생성" 버튼이 동작하지 않습니다 (코드는 직접 입력해야 함).
+- **OPENAI_API_KEY** — 설교 자막 코드 자동 생성에 사용. 없으면 코드를 직접 입력해야 함.
+- **GITHUB_TOKEN** — 찬송가 목록 탭에서 "GitHub에 저장" 시 사용.  
+  GitHub → Settings → Developer settings → Personal access tokens 에서 repo 권한으로 토큰 생성 후 Vercel 환경 변수에 추가. 없으면 찬송가 저장이 불가(불러오기는 가능).
 
 ### 프로젝트 구조 (Vercel 기준)
 

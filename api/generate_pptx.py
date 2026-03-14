@@ -33,11 +33,17 @@ class handler(BaseHTTPRequestHandler):
             card_slides = data.get("card_slides") or []
             hymn_txt_raw = (data.get("hymn_txt_content") or "").strip()
             hymn_txt_content = user_to_hymn_txt(hymn_txt_raw) if hymn_txt_raw else None
+            full_order = bool(data.get("full_order"))
+            hymn_list_intro = data.get("hymn_list_intro") or []
+            if full_order and isinstance(hymn_list_intro, list) and len(hymn_list_intro) < 5:
+                hymn_list_intro = (hymn_list_intro + ["", "", "", "", ""])[:5]
             out_path = run_sermon_code(
                 code,
                 hymn_list=hymn_list,
                 card_slides=card_slides,
                 hymn_txt_content=hymn_txt_content,
+                full_order=full_order,
+                hymn_list_intro=hymn_list_intro if full_order else None,
             )
             with open(out_path, "rb") as f:
                 pptx_bytes = f.read()
