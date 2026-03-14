@@ -3,11 +3,25 @@
 형식: "1. 제목\\n가사\\n\\n2. 제목2\\n가사2\\n\\n..."
 """
 from __future__ import annotations
+import os
 import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-LEGACY_PATH = ROOT / "EvergreenSlideMaker" / "Hymn" / "hymn.txt"
+RELATIVE_LEGACY = "EvergreenSlideMaker/Hymn/hymn.txt"
+
+
+def _legacy_path() -> Path | None:
+    """배포 환경별로 hymn.txt 경로 탐색."""
+    candidates = [
+        ROOT / "EvergreenSlideMaker" / "Hymn" / "hymn.txt",
+        ROOT / RELATIVE_LEGACY.replace("/", os.sep),
+        Path(os.getcwd()) / "EvergreenSlideMaker" / "Hymn" / "hymn.txt",
+    ]
+    for p in candidates:
+        if p.is_file():
+            return p
+    return None
 
 
 def parse_legacy_hymn_txt(content: str) -> list[tuple[str, str]]:
@@ -34,11 +48,12 @@ def parse_legacy_hymn_txt(content: str) -> list[tuple[str, str]]:
 
 
 def load_legacy_hymns() -> list[tuple[str, str]]:
-    """LEGACY_PATH 파일을 읽어 파싱. 파일 없으면 빈 리스트."""
-    if not LEGACY_PATH.is_file():
+    """hymn.txt 파일을 읽어 파싱. 파일 없으면 빈 리스트."""
+    path = _legacy_path()
+    if not path:
         return []
     try:
-        text = LEGACY_PATH.read_text(encoding="utf-8")
+        text = path.read_text(encoding="utf-8")
         return parse_legacy_hymn_txt(text)
     except Exception:
         return []

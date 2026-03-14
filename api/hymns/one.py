@@ -4,7 +4,7 @@ import os
 import sys
 import urllib.request
 import urllib.error
-from urllib.parse import parse_qs, urlparse
+from urllib.parse import parse_qs, urlparse, quote
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 if ROOT not in sys.path:
@@ -23,25 +23,25 @@ class handler(BaseHTTPRequestHandler):
             if not title:
                 self._send(400, {"detail": "title 필요"})
                 return
+            content = None
             repo = os.environ.get("GITHUB_REPO") or GITHUB_REPO
             filename = sanitize_filename(title) + ".txt"
-            url = f"https://api.github.com/repos/{repo}/contents/{HYMN_DIR}/{filename}"
+            path_segment = f"{HYMN_DIR}/{filename}"
+            encoded_path = quote(path_segment, safe="/")
+            url = f"https://api.github.com/repos/{repo}/contents/{encoded_path}"
             headers = {"Accept": "application/vnd.github.raw"}
             token = os.environ.get("GITHUB_TOKEN", "").strip()
             if token:
                 headers["Authorization"] = f"Bearer {token}"
-            req = urllib.request.Request(url, headers=headers)
             try:
+                req = urllib.request.Request(url, headers=headers)
                 with urllib.request.urlopen(req, timeout=10) as r:
                     content = r.read().decode("utf-8")
-                self._send(200, {"title": title, "content": content})
-                return
-            except urllib.error.HTTPError as e:
-                if e.code != 404:
-                    self._send(e.code, {"detail": "조회 실패"})
-                    return
-            content = legacy_one(title)
-            self._send(200, {"title": title, "content": content})
+            except Exception:
+                content = None
+            if content is None:
+                content = legacy_one(title)
+            self._send(200, {"title": title, "content": content or ""})
         except Exception as e:
             self._send(500, {"detail": str(e)})
 
