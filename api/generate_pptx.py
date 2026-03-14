@@ -10,7 +10,7 @@ if ROOT not in sys.path:
     sys.path.insert(0, ROOT)
 
 from lib.hymn_format import user_to_hymn_txt
-from lib.slide_runner import run_sermon_code
+from lib.slide_runner import run_sermon_code, run_worship_order
 
 
 class handler(BaseHTTPRequestHandler):
@@ -25,26 +25,33 @@ class handler(BaseHTTPRequestHandler):
             except json.JSONDecodeError:
                 self._json_response(400, {"detail": "JSON 본문이 필요합니다."})
                 return
-            code = (data.get("code") or "").strip()
-            if not code:
-                self._json_response(400, {"detail": "코드를 입력해 주세요."})
-                return
-            hymn_list = data.get("hymn_list") or []
-            card_slides = data.get("card_slides") or []
-            hymn_txt_raw = (data.get("hymn_txt_content") or "").strip()
-            hymn_txt_content = user_to_hymn_txt(hymn_txt_raw) if hymn_txt_raw else None
-            full_order = bool(data.get("full_order"))
-            hymn_list_intro = data.get("hymn_list_intro") or []
-            if full_order and isinstance(hymn_list_intro, list) and len(hymn_list_intro) < 5:
-                hymn_list_intro = (hymn_list_intro + ["", "", "", "", ""])[:5]
-            out_path = run_sermon_code(
-                code,
-                hymn_list=hymn_list,
-                card_slides=card_slides,
-                hymn_txt_content=hymn_txt_content,
-                full_order=full_order,
-                hymn_list_intro=hymn_list_intro if full_order else None,
-            )
+
+            worship_order = data.get("worship_order")
+            if isinstance(worship_order, list) and len(worship_order) > 0:
+                hymn_txt_raw = (data.get("hymn_txt_content") or "").strip()
+                hymn_txt_content = user_to_hymn_txt(hymn_txt_raw) if hymn_txt_raw else None
+                out_path = run_worship_order(worship_order, hymn_txt_content=hymn_txt_content)
+            else:
+                code = (data.get("code") or "").strip()
+                if not code:
+                    self._json_response(400, {"detail": "코드 또는 worship_order를 입력해 주세요."})
+                    return
+                hymn_list = data.get("hymn_list") or []
+                card_slides = data.get("card_slides") or []
+                hymn_txt_raw = (data.get("hymn_txt_content") or "").strip()
+                hymn_txt_content = user_to_hymn_txt(hymn_txt_raw) if hymn_txt_raw else None
+                full_order = bool(data.get("full_order"))
+                hymn_list_intro = data.get("hymn_list_intro") or []
+                if full_order and isinstance(hymn_list_intro, list) and len(hymn_list_intro) < 5:
+                    hymn_list_intro = (hymn_list_intro + ["", "", "", "", ""])[:5]
+                out_path = run_sermon_code(
+                    code,
+                    hymn_list=hymn_list,
+                    card_slides=card_slides,
+                    hymn_txt_content=hymn_txt_content,
+                    full_order=full_order,
+                    hymn_list_intro=hymn_list_intro if full_order else None,
+                )
             with open(out_path, "rb") as f:
                 pptx_bytes = f.read()
             try:

@@ -12,7 +12,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from docx_parser import get_red_runs_summary, parse_docx
-from slide_runner import run_sermon_code
+from slide_runner import run_sermon_code, run_worship_order
 
 # lib 경로 (설교 코드 생성·찬송 포맷용)
 _ROOT = Path(__file__).resolve().parent.parent
@@ -34,7 +34,8 @@ if STATIC_DIR.exists():
 
 
 class GeneratePptxBody(BaseModel):
-    code: str
+    code: str = ""
+    worship_order: list[dict] | None = None
     hymn_list: list[str] | None = None
     card_slides: list[str] | None = None
     hymn_txt_content: str | None = None
@@ -56,6 +57,7 @@ def index():
 
 
 @app.post("/api/parse-docx")
+@app.post("/api/parse_docx")
 async def api_parse_docx(file: UploadFile = File(...)):
     """
     설교 원고 DOCX를 업로드하면 단락·런 단위로 파싱하여 반환합니다.
@@ -114,13 +116,30 @@ async def api_generate_sermon_code(body: GenerateSermonCodeBody):
 
 
 @app.post("/api/generate-pptx")
+@app.post("/api/generate_pptx")
 async def api_generate_pptx(body: GeneratePptxBody):
     """
-    설교 자막용 코드 + (선택) 찬송 목록/내용 + (선택) 카드 슬라이드를 받아 PPTX를 생성합니다.
+    worship_order가 있으면 순서대로 PPT 생성; 없으면 code + 찬송/카드로 생성합니다.
     """
+    worship_order = body.worship_order or []
+    if isinstance(worship_order, list) and len(worship_order) > 0:
+        hymn_txt_raw = (body.hymn_txt_content or "").strip()
+        hymn_txt_content = user_to_hymn_txt(hymn_txt_raw) if hymn_txt_raw and user_to_hymn_txt else None
+        try:
+            out_path = run_worship_order(worship_order, hymn_txt_content=hymn_txt_content)
+            return FileResponse(
+                out_path,
+                media_type="application/vnd.openxmlformats-officedocument.presentationml.presentation",
+                filename=os.path.basename(out_path),
+            )
+        except FileNotFoundError as e:
+            raise HTTPException(503, str(e)) from e
+        except Exception as e:
+            raise HTTPException(500, f"PPTX 생성 중 오류: {e}") from e
+
     code = (body.code or "").strip()
     if not code:
-        raise HTTPException(400, "코드를 입력해 주세요.")
+        raise HTTPException(400, "코드 또는 worship_order를 입력해 주세요.")
     hymn_list = body.hymn_list or []
     card_slides = body.card_slides or []
     hymn_txt_raw = (body.hymn_txt_content or "").strip()

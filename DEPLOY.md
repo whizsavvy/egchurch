@@ -1,5 +1,37 @@
 # Vercel + GitHub 배포 가이드
 
+## Vercel에 추가해야 할 것 (체크리스트)
+
+배포 후 아래를 **반드시** 설정하세요.
+
+### 1. 환경 변수 (Project → Settings → Environment Variables)
+
+| 변수명 | 필수 | 설명 |
+|--------|------|------|
+| **OPENAI_API_KEY** | 권장 | 말씀 세팅의 "AI 도움받기"에 필요. 없으면 AI 생성 불가. |
+| **GITHUB_TOKEN** | 찬송 저장 시 필수 | 찬송 세팅에서 "GitHub에 저장" 시 사용. repo 권한 Personal Access Token. 없으면 저장 불가(불러오기는 가능). |
+
+- **GITHUB_TOKEN** 발급: GitHub → Settings → Developer settings → Personal access tokens → Generate new token → `repo` 체크.
+- 두 변수 모두 **Production**, **Preview**, **Development**에 적용해 두면 됩니다.
+
+### 2. (선택) 다른 저장소를 쓸 때
+
+| 변수명 | 기본값 | 설명 |
+|--------|--------|------|
+| **GITHUB_REPO** | `whizsavvy/egchurch` | 찬송가 저장 시 사용할 GitHub 저장소 (owner/repo). |
+| **HYMN_GITHUB_RAW** | `https://raw.githubusercontent.com/whizsavvy/egchurch/main/data/hymn_data.json` | 찬송가 불러오기 시 사용할 raw URL. |
+
+### 3. 빌드/출력 설정
+
+- **Build & Development Settings**에서 **Output Directory**를 `public`으로 두면 루트 URL(`/`)에서 `public/index.html`이 열립니다.  
+  (이미 `vercel.json`에 `"outputDirectory": "public"`이 있으면 자동 적용됩니다.)
+
+### 4. (선택) 실행 시간 연장
+
+- PPTX 생성이 길어지면 **Project → Settings → Functions**에서 `api/generate_pptx.py`의 **Max Duration**을 60초 등으로 늘릴 수 있습니다. (플랜에 따라 상한 있음.)
+
+---
+
 ## 1. Vercel로 배포하기
 
 이 프로젝트는 **Vercel**에 올리면 그대로 배포할 수 있습니다.
@@ -23,12 +55,17 @@
 - **GITHUB_TOKEN** — 찬송가 목록 탭에서 "GitHub에 저장" 시 사용.  
   GitHub → Settings → Developer settings → Personal access tokens 에서 repo 권한으로 토큰 생성 후 Vercel 환경 변수에 추가. 없으면 찬송가 저장이 불가(불러오기는 가능).
 
-### 프로젝트 구조 (Vercel 기준)
+### 프로젝트 구조 및 API (Vercel 기준)
 
-- `public/` — 정적 파일 (index.html 등) → 루트 경로에서 제공
-- `api/` — 서버리스 함수: `parse_docx`, `generate_sermon_code`, `generate_pptx`
-- `lib/` — 공통 코드 (docx_parser, slide_runner, hymn_format, sermon_prompt)
-- `EvergreenSlideMaker/` — 슬라이드 제작용 리소스 (성경, 찬송, 이미지 등)
+- **public/** — 정적 파일 (index.html). `outputDirectory: "public"`로 루트(/)에서 제공.
+- **api/** — 서버리스 함수 (자동 배포됨):
+  - `POST /api/parse_docx` — DOCX 파싱
+  - `POST /api/generate_sermon_code` — AI 설교 코드 생성 (OPENAI_API_KEY 필요)
+  - `POST /api/generate_pptx` — PPTX 생성
+  - `GET /api/get_hymn_data` — 찬송가 목록 불러오기
+  - `POST /api/save_hymn_data` — 찬송가 목록 GitHub 저장 (GITHUB_TOKEN 필요)
+- **lib/** — 공통 코드 (docx_parser, slide_runner, hymn_format, sermon_prompt)
+- **EvergreenSlideMaker/** — 슬라이드 제작용 리소스 (성경, 찬송, 이미지 등)
 
 ---
 

@@ -141,3 +141,81 @@ def run_sermon_code(
         if temp_evergreen and temp_evergreen.exists():
             shutil.rmtree(temp_evergreen, ignore_errors=True)
         _setting.folder_path = str(ROOT / "EvergreenSlideMaker")
+
+
+def run_worship_order(
+    order: list[dict],
+    hymn_txt_content: str | None = None,
+    output_filename: str | None = None,
+) -> str:
+    """
+    예배 순서 배열로 PPT 생성.
+    order 항목: { type: "image"|"blank"|"hymn"|"card"|"bible"|"subtitle", ... }
+    - image: src (파일명), text (선택)
+    - hymn: title
+    - card: text, bgColor (선택, 기본 000000 for 통성기도 등)
+    - bible: book, start, end (선택)
+    - subtitle: text
+    """
+    temp_evergreen = None
+    if hymn_txt_content and hymn_txt_content.strip():
+        temp_evergreen = Path(tempfile.mkdtemp())
+        try:
+            shutil.copytree(ROOT / "EvergreenSlideMaker", temp_evergreen / "EvergreenSlideMaker")
+            hymn_file = temp_evergreen / "EvergreenSlideMaker" / "Hymn" / "hymn.txt"
+            hymn_file.parent.mkdir(parents=True, exist_ok=True)
+            hymn_file.write_text(hymn_txt_content.strip(), encoding="utf-8")
+            _setting.folder_path = str(temp_evergreen / "EvergreenSlideMaker")
+        except Exception:
+            if temp_evergreen and temp_evergreen.exists():
+                shutil.rmtree(temp_evergreen, ignore_errors=True)
+            raise
+
+    try:
+        prs = Presentation()
+        prs.slide_width = Cm(33.867)
+        prs.slide_height = Cm(19.05)
+        today = datetime.datetime.now().strftime("%Y-%m-%d")
+        out_name = output_filename or f"{today}_늘푸른교회_.pptx"
+        out_path = os.path.join(tempfile.gettempdir(), out_name)
+        pic_dic = _setting.folder_path + "/image/"
+        run_directory = os.path.join(_setting.folder_path, "bible")
+
+        for item in order or []:
+            t = (item.get("type") or "").strip().lower()
+            if t == "image":
+                src = (item.get("src") or item.get("path") or "2026.png").strip()
+                text = (item.get("text") or "").strip()
+                if add_image_slide:
+                    add_image_slide(prs, pic_dic + src, text=text)
+            elif t == "blank":
+                if add_blank_slide:
+                    add_blank_slide(prs)
+            elif t == "hymn":
+                title = (item.get("title") or item.get("text") or "").strip()
+                if title and title != "(찬송 선택)" and add_hymn_slide:
+                    add_hymn_slide(prs, title)
+            elif t == "card":
+                text = (item.get("text") or "").strip()
+                if not text:
+                    continue
+                bg = (item.get("bgColor") or item.get("background_color") or "00FF00").strip()
+                if add_card_slide:
+                    add_card_slide(prs, input_text=text, background_color=bg)
+            elif t == "bible":
+                book = (item.get("book") or "").strip()
+                start = (item.get("start") or item.get("startVerse") or "").strip()
+                end = (item.get("end") or item.get("endVerse") or "").strip()
+                if book and start and add_bible_slide:
+                    add_bible_slide(prs, run_directory, book, start, end if end else start)
+            elif t == "subtitle":
+                text = (item.get("text") or "").strip()
+                if text and add_subtitle_slide:
+                    add_subtitle_slide(prs, input_text=text)
+
+        prs.save(out_path)
+        return out_path
+    finally:
+        if temp_evergreen and temp_evergreen.exists():
+            shutil.rmtree(temp_evergreen, ignore_errors=True)
+        _setting.folder_path = str(ROOT / "EvergreenSlideMaker")
