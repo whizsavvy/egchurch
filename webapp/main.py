@@ -7,7 +7,7 @@ import sys
 from pathlib import Path
 
 from fastapi import FastAPI, File, HTTPException, UploadFile
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, PlainTextResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
@@ -20,12 +20,17 @@ if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 try:
     from lib.hymn_format import user_to_hymn_txt
+    from lib.hymn_files import sanitize_filename, filename_to_title
     from lib.sermon_prompt import SERMON_CODE_SYSTEM
     from lib.bible_verse import get_bible_verse_text
 except ImportError:
     user_to_hymn_txt = None
+    sanitize_filename = None
+    filename_to_title = None
     SERMON_CODE_SYSTEM = ""
     get_bible_verse_text = None
+
+HYMN_DIR_LOCAL = _ROOT / "data" / "hymns"
 
 app = FastAPI(title="늘푸른교회 자막 웹앱", version="1.0.0")
 
@@ -170,6 +175,81 @@ async def api_generate_pptx(body: GeneratePptxBody):
         raise HTTPException(422, str(e)) from e
     except Exception as e:
         raise HTTPException(500, f"PPTX 생성 중 오류: {e}") from e
+
+
+def _hymn_dir():
+    HYMN_DIR_LOCAL.mkdir(parents=True, exist_ok=True)
+    return HYMN_DIR_LOCAL
+
+
+@app.get("/api/hymns/list")
+def api_hymns_list():
+    """찬송 목록 (로컬: data/hymns/*.txt)."""
+    if not HYMN_DIR_LOCAL.exists():
+        return {"items": []}
+    items = []
+    for f in sorted(_hymn_dir().iterdir()):
+        if f.suffix.lower() == ".txt" and f.is_file():
+            items.append(filename_to_title(f.name) if filename_to_title else f.stem)
+    return {"items": items}
+
+
+@app.get("/api/hymns/one")
+def api_hymns_one(title: str = ""):
+    """찬송 한 곡 내용."""
+    title = (title or "").strip()
+    if not title or not sanitize_filename:
+        raise HTTPException(400, "title 필요")
+    path = _hymn_dir() / (sanitize_filename(title) + ".txt")
+    if not path.is_file():
+        return {"title": title, "content": ""}
+    return {"title": title, "content": path.read_text(encoding="utf-8")}
+
+
+@app.get("/api/hymns/merged")
+def api_hymns_merged():
+    """PPT용 병합 문자열 (제목\\n------\\n가사)."""
+    if not HYMN_DIR_LOCAL.exists():
+        return ""
+    parts = []
+    for f in sorted(_hymn_dir().iterdir()):
+        if f.suffix.lower() == ".txt" and f.is_file():
+            title = filename_to_title(f.name) if filename_to_title else f.stem
+            content = f.read_text(encoding="utf-8").strip()
+            parts.append(title + "\n------\n" + content)
+    return PlainTextResponse("\n\n".join(parts), media_type="text/plain; charset=utf-8")
+
+
+class HymnSaveBody(BaseModel):
+    title: str = ""
+    content: str = ""
+
+
+class HymnDeleteBody(BaseModel):
+    title: str = ""
+
+
+@app.post("/api/hymns/save")
+def api_hymns_save(body: HymnSaveBody):
+    """찬송 한 곡 저장 (로컬 파일)."""
+    title = (body.title or "").strip()
+    if not title or not sanitize_filename:
+        raise HTTPException(400, "title 필요")
+    path = _hymn_dir() / (sanitize_filename(title) + ".txt")
+    path.write_text((body.content or "").strip(), encoding="utf-8")
+    return {"ok": True, "title": title}
+
+
+@app.post("/api/hymns/delete")
+def api_hymns_delete(body: HymnDeleteBody):
+    """찬송 한 곡 삭제."""
+    title = (body.title or "").strip()
+    if not title or not sanitize_filename:
+        raise HTTPException(400, "title 필요")
+    path = _hymn_dir() / (sanitize_filename(title) + ".txt")
+    if path.is_file():
+        path.unlink()
+    return {"ok": True, "title": title}
 
 
 @app.get("/api/get_bible_verse")

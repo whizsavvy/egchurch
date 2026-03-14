@@ -18,8 +18,7 @@
 
 | 변수명 | 기본값 | 설명 |
 |--------|--------|------|
-| **GITHUB_REPO** | `whizsavvy/egchurch` | 찬송가 저장 시 사용할 GitHub 저장소 (owner/repo). |
-| **HYMN_GITHUB_RAW** | `https://raw.githubusercontent.com/whizsavvy/egchurch/main/data/hymn_data.json` | 찬송가 불러오기 시 사용할 raw URL. |
+| **GITHUB_REPO** | `whizsavvy/egchurch` | 찬송가 저장 시 사용할 GitHub 저장소 (owner/repo). 찬송은 **항목당 파일 하나**로 `data/hymns/제목.txt` 형태로 저장됩니다. |
 
 ### 3. 빌드/출력 설정
 
