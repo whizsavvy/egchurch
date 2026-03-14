@@ -1,5 +1,4 @@
 # Vercel Serverless: POST /api/generate_pptx — 코드 + 찬송/카드 받아 PPTX 생성 후 바이너리 반환
-import base64
 import json
 import os
 import sys
@@ -9,13 +8,17 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if ROOT not in sys.path:
     sys.path.insert(0, ROOT)
 
-from lib.hymn_format import user_to_hymn_txt
-from lib.slide_runner import run_sermon_code, run_worship_order
+
+def _get_runner():
+    from lib.hymn_format import user_to_hymn_txt
+    from lib.slide_runner import run_sermon_code, run_worship_order
+    return user_to_hymn_txt, run_sermon_code, run_worship_order
 
 
 class handler(BaseHTTPRequestHandler):
     def do_POST(self):
         try:
+            user_to_hymn_txt, run_sermon_code, run_worship_order = _get_runner()
             content_length = int(self.headers.get("Content-Length", 0))
             body = self.rfile.read(content_length) if content_length else b"{}"
             if isinstance(body, bytes):
@@ -66,10 +69,14 @@ class handler(BaseHTTPRequestHandler):
             self.wfile.write(pptx_bytes)
         except FileNotFoundError as e:
             self._json_response(503, {"detail": str(e)})
+        except ImportError as e:
+            self._json_response(503, {"detail": f"모듈 로드 실패: {e}. EvergreenSlideMaker 폴더가 배포에 포함되어 있는지 확인하세요."})
         except RuntimeError as e:
             self._json_response(422, {"detail": str(e)})
         except Exception as e:
-            msg = str(e) or type(e).__name__
+            msg = str(e).strip() or type(e).__name__
+            if not msg:
+                msg = "알 수 없는 오류"
             self._json_response(500, {"detail": f"PPTX 생성 중 오류: {msg}"})
 
     def _json_response(self, status, data):
